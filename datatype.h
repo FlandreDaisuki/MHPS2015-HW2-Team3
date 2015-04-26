@@ -21,11 +21,11 @@ typedef std::vector< std::vector<int> > Matrix;
 class Schedule
 {
 public:
-    Schedule(int j, int m): jobs(j), machines(m)
+    Schedule(int j, int m): jobs(j), machines(m), fitness(0)
     {
         this->matrix.resize(machines, std::vector<int> (jobs, 0));
     }
-    Schedule(const Schedule &s) : jobs(s.jobs), machines(s.machines)
+    Schedule(const Schedule &s) : jobs(s.jobs), machines(s.machines), fitness(0)
     {
         this->matrix.resize(machines, std::vector<int> (jobs, 0));
 
@@ -52,6 +52,10 @@ public:
     {
         return machines;
     }
+    int getFitness() const
+    {
+        return fitness;
+    }
     void print(std::ostream &out = std::cout) const
     {
         using std::endl;
@@ -70,7 +74,7 @@ public:
     }
 
     //Member Functions
-    int makespan() const //
+    int makespan() const //計算makespan 因為是計算 所以會花費時間 或許可以存到private裏面
     {
         std::vector<int> timespan(jobs + 1, 0);
 
@@ -91,6 +95,7 @@ public:
     }
 private:
     const int jobs, machines;
+    int fitness; // this variable is for environment selection(Baldwinian).
     Matrix matrix;
 };
 
@@ -99,6 +104,13 @@ class Population
 public:
 
     Population() {};
+    Population(const Population &p)
+    {
+        for (auto pitr = p.schedules.begin(); pitr != p.schedules.end(); ++pitr)
+        {
+            schedules.push_back(*pitr);
+        }
+    };
     ~Population() {};
 
     //get/set Functions
@@ -119,6 +131,7 @@ public:
     //Member Functions
     void readInitialPopulation(const char* filename)
     {
+        //this function is for testing data
         std::fstream fin;
         fin.open(filename);
 
@@ -133,7 +146,7 @@ public:
 
         for (int sn = 0; sn < schedules_n; ++sn)
         {
-            Schedule s(jobs_n,machines_n);
+            Schedule s(jobs_n, machines_n);
             for (int mn = 0; mn < machines_n; ++mn)
             {
                 for (int jn = 0; jn < jobs_n; ++jn)
@@ -146,7 +159,16 @@ public:
     }
     void InitialPopulation(int population_size)
     {
-        //todo
+        //read initial base schedule
+        //generate a set of better population
+    }
+    void genChild()
+    {
+        //select betters {輪盤法,window,...}
+        //直接當子代 (rate)
+        //crossover {1 point, 2 point,....}
+        //mutation
+        //add to this population
     }
 private:
     std::vector<Schedule> schedules;
