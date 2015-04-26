@@ -23,17 +23,17 @@ class Schedule
 public:
     Schedule(int j, int m): jobs(j), machines(m), fitness(0)
     {
-        this->matrix.resize(machines, std::vector<int> (jobs, 0));
+        this->matrix.resize(jobs, std::vector<int> (machines, 0));
     }
     Schedule(const Schedule &s) : jobs(s.jobs), machines(s.machines), fitness(0)
     {
-        this->matrix.resize(machines, std::vector<int> (jobs, 0));
+        this->matrix.resize(jobs, std::vector<int> (machines, 0));
 
         for (int i = 0; i < s.machines; ++i)
         {
             for (int j = 0; j < s.jobs; ++j)
             {
-                this->matrix[i][j] = s.matrix[i][j];
+                this->matrix[j][i] = s.matrix[j][i];
             }
         }
     }
@@ -52,6 +52,10 @@ public:
     {
         return machines;
     }
+    void setFitness(int f)
+    {
+        fitness = f;
+    }
     int getFitness() const
     {
         return fitness;
@@ -66,7 +70,7 @@ public:
             for (int j = 0; j < jobs; ++j)
             {
                 out.width(3);
-                out << matrix[i][j];
+                out << matrix[j][i];
             }
             out << endl;
         }
@@ -82,16 +86,14 @@ public:
         {
             for (int j = 1; j <= jobs; ++j)
             {
-                timespan[j] = std::max(timespan[j], timespan[j - 1]) + matrix[i][j - 1];
+                timespan[j] = std::max(timespan[j], timespan[j - 1]) + matrix[j - 1][i];
             }
         }
         return timespan[jobs];
     }
-    void swapJobs(int job1, int job2) {
-        for (int i = 0; i < machines; ++i)
-        {
-            std::swap(matrix[i][job1], matrix[i][job2]);
-        }
+    void swapJobs(int job1, int job2)
+    {
+        std::swap(matrix[job1], matrix[job2]);
     }
 private:
     const int jobs, machines;
@@ -151,7 +153,7 @@ public:
             {
                 for (int jn = 0; jn < jobs_n; ++jn)
                 {
-                    fin >> s.getMatrix()[mn][jn];
+                    fin >> s.getMatrix()[jn][mn];
                 }
             }
             schedules.push_back(s);
@@ -162,9 +164,13 @@ public:
         //read initial base schedule
         //generate a set of better population
     }
+    void calculateFitness()
+    {
+        //calculate each schedule fitness
+    }
     void genChild()
     {
-        //select betters {輪盤法,window,...}
+        //select betters {輪盤法,window,...} depend on fitness
         //直接當子代 (rate)
         //crossover {1 point, 2 point,....}
         //mutation
