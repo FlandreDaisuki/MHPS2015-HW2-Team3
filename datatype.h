@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+#include <cassert>
 #include <vector>
 #include <string>
 #include <ostream>
@@ -23,17 +25,29 @@ class Schedule
 public:
     Schedule(int j, int m): jobs(j), machines(m), fitness(0)
     {
-        this->matrix.resize(jobs, std::vector<int> (machines, 0));
+        matrix.resize(jobs, std::vector<int> (machines, 0));
     }
     Schedule(const Schedule &s) : jobs(s.jobs), machines(s.machines), fitness(0)
     {
-        this->matrix.resize(jobs, std::vector<int> (machines, 0));
+        matrix.resize(jobs, std::vector<int> (machines, 0));
 
         for (int i = 0; i < s.machines; ++i)
         {
             for (int j = 0; j < s.jobs; ++j)
             {
-                this->matrix[j][i] = s.matrix[j][i];
+                matrix[j][i] = s.matrix[j][i];
+            }
+        }
+    }
+    Schedule(const Matrix &m) : jobs(m.size()), machines(m[0].size()), fitness(0)
+    {
+        matrix.resize(jobs, std::vector<int> (machines, 0));
+
+        for (int i = 0; i < machines; ++i)
+        {
+            for (int j = 0; j < jobs; ++j)
+            {
+                matrix[j][i] = m[j][i];
             }
         }
     }
@@ -101,10 +115,34 @@ private:
     Matrix matrix;
 };
 
+class JobMap
+{
+public:
+    JobMap(const Matrix &m)
+    {
+        for (size_t msz = 0; msz < m.size(); ++msz)
+        {
+            job_to_jn[m[msz]] = msz;
+            jn_to_job[msz] = m[msz];
+        }
+    };
+    ~JobMap() {};
+    const std::vector<int> &getJobs(size_t i)
+    {
+        return jn_to_job[i];
+    }
+    size_t getJobNumber(const std::vector<int> &j)
+    {
+        return job_to_jn[j];
+    }
+private:
+    std::map< std::vector<int>, int  > job_to_jn;
+    std::map< int, std::vector<int> > jn_to_job;
+};
+
 class Population
 {
 public:
-
     Population() {};
     Population(const Population &p)
     {
@@ -112,13 +150,23 @@ public:
         {
             schedules.push_back(*pitr);
         }
+
+        jmp = new JobMap(schedules[0].getMatrix());
     };
     ~Population() {};
 
     //get/set Functions
+    const JobMap& getJobMap() {
+        return *jmp;
+    }
     std::vector<Schedule>& getSchedules()
     {
         return schedules;
+    }
+    Schedule& getSchedule(size_t i)
+    {
+        assert(i < schedules.size() && i >= 0);
+        return schedules[i];
     }
     void print(std::ostream &out = std::cout) const
     {
@@ -158,6 +206,8 @@ public:
             }
             schedules.push_back(s);
         }
+
+        jmp = new JobMap(schedules[0].getMatrix());
     }
     void InitialPopulation(int population_size)
     {
@@ -168,14 +218,23 @@ public:
     {
         //calculate each schedule fitness
     }
-    void genChild()
+    void genChildren()
     {
         //select betters {輪盤法,window,...} depend on fitness
-        //直接當子代 (rate)
+        //elitism
         //crossover {1 point, 2 point,....}
         //mutation
         //add to this population
     }
+    void envSelection()
+    {
+        // 已知前半是parent 後半是children
+        // 2/4
+        // (1,1)
+        // else
+    }
 private:
+    JobMap *jmp;
     std::vector<Schedule> schedules;
 };
+
