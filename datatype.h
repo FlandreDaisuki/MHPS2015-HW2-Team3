@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <ostream>
+#include <fstream>
 #include <cstdio>
 #include <algorithm>
 
@@ -91,4 +92,62 @@ public:
 private:
     const int jobs, machines;
     Matrix matrix;
+};
+
+class Population
+{
+public:
+
+    Population() {};
+    ~Population() {};
+
+    //get/set Functions
+    std::vector<Schedule>& getSchedules()
+    {
+        return schedules;
+    }
+    void print(std::ostream &out = std::cout) const
+    {
+        using std::endl;
+
+        for (auto itr = schedules.begin(); itr != schedules.end(); ++itr)
+        {
+            itr->print(out);
+        }
+    }
+
+    //Member Functions
+    void readInitialPopulation(const char* filename)
+    {
+        std::fstream fin;
+        fin.open(filename);
+
+        if (!fin.is_open())
+        {
+            std::cout << "Fail to open file." << std::endl;
+            return;
+        }
+
+        int jobs_n, machines_n, schedules_n;
+        fin >> jobs_n >> machines_n >> schedules_n;
+
+        for (int sn = 0; sn < schedules_n; ++sn)
+        {
+            Schedule s(jobs_n,machines_n);
+            for (int mn = 0; mn < machines_n; ++mn)
+            {
+                for (int jn = 0; jn < jobs_n; ++jn)
+                {
+                    fin >> s.getMatrix()[mn][jn];
+                }
+            }
+            schedules.push_back(s);
+        }
+    }
+    void InitialPopulation(int population_size)
+    {
+        //todo
+    }
+private:
+    std::vector<Schedule> schedules;
 };
