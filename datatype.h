@@ -233,6 +233,11 @@ public:
         // (1,1)
         // else
     }
+    void localSearch(int num_to_search)
+    {
+        // SA search for each
+        // calculate fitness
+    }
 private:
     JobMap *jmp;
     std::vector<Schedule> schedules;
