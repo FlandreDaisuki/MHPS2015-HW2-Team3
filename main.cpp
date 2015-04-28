@@ -15,7 +15,6 @@ int main(int argc, char const *argv[])
     Population parent;
     parent.readInitialPopulation("testdata.txt");
     parent.print();
-    const JobMap jobmap = parent.getJobMap();
 
     parent.calculateFitness();
     for (int pitr = 0; pitr < POPULATION_ITERATION; ++pitr)

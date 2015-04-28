@@ -188,31 +188,6 @@ private:
     }
 };
 
-class JobMap
-{
-public:
-    JobMap(const Matrix &m)
-    {
-        for (size_t msz = 0; msz < m.size(); ++msz)
-        {
-            job_to_jn[m[msz]] = msz;
-            jn_to_job[msz] = m[msz];
-        }
-    };
-    ~JobMap() {};
-    const std::vector<int> &getJobs(size_t i)
-    {
-        return jn_to_job[i];
-    }
-    size_t getJobNumber(const std::vector<int> &j)
-    {
-        return job_to_jn[j];
-    }
-private:
-    std::map< std::vector<int>, int  > job_to_jn;
-    std::map< int, std::vector<int> > jn_to_job;
-};
-
 class Population
 {
 public:
@@ -223,15 +198,11 @@ public:
         {
             schedules.push_back(*pitr);
         }
-
-        jmp = new JobMap(schedules[0].getMatrix());
+        job_map = schedules[0].getMatrix();
     };
     ~Population() {};
 
     //get/set Functions
-    const JobMap& getJobMap() {
-        return *jmp;
-    }
     std::vector<Schedule>& getSchedules()
     {
         return schedules;
@@ -280,12 +251,14 @@ public:
             schedules.push_back(s);
         }
 
-        jmp = new JobMap(schedules[0].getMatrix());
+        job_map = schedules[0].getMatrix();
     }
     void InitialPopulation(int population_size)
     {
         //read initial base schedule
         //generate a set of better population
+
+        job_map = schedules[0].getMatrix();
     }
     void calculateFitness()
     {
@@ -321,10 +294,18 @@ public:
     }
     void sortPopulation()
     {
-        
+
+    }
+    std::vector<int> scheduleToJob(const Schedule &s)
+    {
+        // Schedule encode to job vector
+    }
+    Schedule jobToSchedule(const std::vector<int> &jobv)
+    {
+        // job vector decode to Schedule
     }
 private:
-    JobMap *jmp;
     std::vector<Schedule> schedules;
+    Matrix job_map;
 };
 
