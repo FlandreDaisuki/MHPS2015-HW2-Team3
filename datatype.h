@@ -134,7 +134,6 @@ private:
     int simulated_annealing(int iteration_n)
     {
         Schedule sa(*this);
-        std::cout << sa.makespan<<"\n";
 
         sa.setMakespan(sa.calcMakespan());
 
@@ -311,6 +310,18 @@ public:
     {
         // SA search for each
         // calculate fitness
+    }
+    void sortParents()
+    {
+
+    }
+    void sortChildren()
+    {
+
+    }
+    void sortPopulation()
+    {
+        
     }
 private:
     JobMap *jmp;
