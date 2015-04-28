@@ -7,6 +7,9 @@
 #include <ostream>
 #include <fstream>
 #include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <ctime>
 #include <algorithm>
 
 /* Nameing Guide *************/
@@ -23,11 +26,11 @@ typedef std::vector< std::vector<int> > Matrix;
 class Schedule
 {
 public:
-    Schedule(int j, int m): jobs(j), machines(m), fitness(0)
+    Schedule(int j, int m): jobs(j), machines(m), fitness(0), makespan(0)
     {
         matrix.resize(jobs, std::vector<int> (machines, 0));
     }
-    Schedule(const Schedule &s) : jobs(s.jobs), machines(s.machines), fitness(0)
+    Schedule(const Schedule &s) : jobs(s.jobs), machines(s.machines), fitness(0), makespan(0)
     {
         matrix.resize(jobs, std::vector<int> (machines, 0));
 
@@ -39,7 +42,7 @@ public:
             }
         }
     }
-    Schedule(const Matrix &m) : jobs(m.size()), machines(m[0].size()), fitness(0)
+    Schedule(const Matrix &m) : jobs(m.size()), machines(m[0].size()), fitness(0), makespan(0)
     {
         matrix.resize(jobs, std::vector<int> (machines, 0));
 
@@ -66,6 +69,15 @@ public:
     {
         return machines;
     }
+    void setMakespan(int s)
+    {
+        makespan = s;
+    }
+    int getMakespan() const
+    {
+        assert(makespan > 0);
+        return makespan;
+    }
     void setFitness(int f)
     {
         fitness = f;
@@ -88,11 +100,11 @@ public:
             }
             out << endl;
         }
-        out << "Makespan:" << makespan() << endl << endl;
+        out << "Makespan:" << makespan << endl << endl;
     }
 
     //Member Functions
-    int makespan() const //計算makespan 因為是計算 所以會花費時間 或許可以存到private裏面
+    int calcMakespan() const
     {
         std::vector<int> timespan(jobs + 1, 0);
 
@@ -109,10 +121,72 @@ public:
     {
         std::swap(matrix[job1], matrix[job2]);
     }
+    void localSearch()
+    {
+        //do local search
+    }
 private:
     const int jobs, machines;
     int fitness; // this variable is for environment selection(Baldwinian).
+    int makespan;
     Matrix matrix;
+
+    int simulated_annealing(int iteration_n)
+    {
+        Schedule sa(*this);
+        std::cout << sa.makespan<<"\n";
+
+        sa.setMakespan(sa.calcMakespan());
+
+        const double INIT_T = 10000.0;
+        const double TERM_T = 0.005;
+        const double COOLDOWN = 0.99; //cool down every iterations
+
+        double temperature = INIT_T;
+        for (int iter = 0; iter < iteration_n  && temperature > TERM_T ; ++iter)
+        {
+            int xbefore = sa.getMakespan();
+
+            int job1 = rand() % jobs, job2 = rand() % jobs;
+            while (job1 == job2)
+            {
+                job2 = rand() % jobs;
+            }
+
+            sa.swapJobs(job1, job2);
+            int xafter = sa.calcMakespan();
+
+            if (xafter < xbefore)
+            {
+                //accept
+                sa.setMakespan(xafter);
+            }
+            else
+            {
+                double r = (std::rand() % 10000) / 10000.0;
+                //printf("E:%f r:%f\n", std::exp((xafter - xbefore) / temperature) , r);
+
+                if (std::exp((xbefore - xafter) / temperature) > r)
+                {
+                    //accept
+                    sa.setMakespan(xafter);
+                }
+                else
+                {
+                    //not accept
+                    sa.swapJobs(job1, job2);
+                }
+            }
+
+            temperature *= COOLDOWN;
+
+            //sa.print();
+            //printf("temperature:%f\n", temperature);
+            //fgetc(stdin);
+        }
+
+        return sa.getMakespan();
+    }
 };
 
 class JobMap
