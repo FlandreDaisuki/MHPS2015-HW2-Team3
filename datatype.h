@@ -1,15 +1,15 @@
 #pragma once
 
-#include <map>
+#include <cmath>
+#include <ctime>
+#include <cstdio>
 #include <cassert>
+#include <cstdlib>
+#include <map>
 #include <vector>
 #include <string>
 #include <ostream>
 #include <fstream>
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <ctime>
 #include <algorithm>
 
 /* Nameing Guide *************/
@@ -30,30 +30,10 @@ public:
     {
         matrix.resize(jobs, std::vector<int> (machines, 0));
     }
-    Schedule(const Schedule &s) : jobs(s.jobs), machines(s.machines), fitness(0), makespan(0)
-    {
-        matrix.resize(jobs, std::vector<int> (machines, 0));
-
-        for (int i = 0; i < s.machines; ++i)
-        {
-            for (int j = 0; j < s.jobs; ++j)
-            {
-                matrix[j][i] = s.matrix[j][i];
-            }
-        }
-    }
-    Schedule(const Matrix &m) : jobs(m.size()), machines(m[0].size()), fitness(0), makespan(0)
-    {
-        matrix.resize(jobs, std::vector<int> (machines, 0));
-
-        for (int i = 0; i < machines; ++i)
-        {
-            for (int j = 0; j < jobs; ++j)
-            {
-                matrix[j][i] = m[j][i];
-            }
-        }
-    }
+    Schedule(const Schedule &s) : jobs(s.jobs), machines(s.machines), fitness(s.fitness), makespan(s.makespan), matrix(s.matrix)
+    {}
+    Schedule(const Matrix &m) : jobs(m.size()), machines(m[0].size()), fitness(0), makespan(0), matrix(m)
+    {}
     ~Schedule() {}
 
     //get/set Functions
@@ -75,7 +55,7 @@ public:
     }
     int getMakespan() const
     {
-        assert(makespan > 0);
+        assert(makespan >= 0);
         return makespan;
     }
     void setFitness(int f)
@@ -100,7 +80,7 @@ public:
             }
             out << endl;
         }
-        out << "Makespan:" << makespan << endl << endl;
+        out << "Makespan:" << makespan << " Fitness:" << fitness << endl << endl;
     }
 
     //Member Functions
@@ -124,6 +104,17 @@ public:
     void localSearch()
     {
         //do local search
+    }
+
+    Schedule& operator=(const Schedule& rhs)
+    {
+        const_cast<int&>(jobs) = rhs.jobs;
+        const_cast<int&>(machines) = rhs.machines;
+        fitness = rhs.fitness;
+        makespan = rhs.makespan;
+        matrix = rhs.matrix;
+
+        return *this;
     }
 private:
     const int jobs, machines;
@@ -284,9 +275,14 @@ public:
         // SA search for each
         // calculate fitness
     }
-    void sortParents()
-    {
 
+
+    void sortParents(int num_of_parent)
+    {
+        std::sort(schedules.begin(), schedules.begin() + num_of_parent, [](const Schedule & a, const Schedule & b) -> bool
+        {
+            return a.getFitness() > b.getFitness();
+        });
     }
     void sortChildren()
     {
@@ -294,7 +290,10 @@ public:
     }
     void sortPopulation()
     {
-
+        std::sort(schedules.begin(), schedules.end(), [](const Schedule & a, const Schedule & b) -> bool
+        {
+            return a.getFitness() > b.getFitness();
+        });
     }
     std::vector<int> scheduleToJob(const Schedule &s)
     {
@@ -307,5 +306,6 @@ public:
 private:
     std::vector<Schedule> schedules;
     Matrix job_map;
+
 };
 
