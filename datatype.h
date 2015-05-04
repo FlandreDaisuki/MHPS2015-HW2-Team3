@@ -21,7 +21,7 @@
 /*****************************/
 
 typedef std::vector< std::vector<int> > Matrix;
-
+const int LOCAL_SEARCH_ITERATION = 1000; // iterations of local search
 ///一個無編碼的排程，一個解序列
 class Schedule
 {
@@ -57,10 +57,6 @@ public:
     {
         assert(makespan >= 0);
         return makespan;
-    }
-    void calculateFitness()
-    {
-
     }
     void setFitness(int f)
     {
@@ -108,9 +104,7 @@ public:
     void localSearch()
     {
         //do local search
-        int LOCAL_SEARCH_ITERATION=20;
         this->simulated_annealing(LOCAL_SEARCH_ITERATION);
-        this->calculateFitness();
     }
     Schedule& operator=(const Schedule& rhs)
     {
@@ -128,7 +122,7 @@ private:
     int makespan;
     Matrix matrix;
 
-    void simulated_annealing(int iteration_n)
+    int simulated_annealing(int iteration_n)
     {
         Schedule sa(*this);
 
@@ -180,7 +174,7 @@ private:
             //printf("temperature:%f\n", temperature);
             //fgetc(stdin);
         }
-        //sa.getMakespan();
+        sa.getMakespan();
     }
 };
 
@@ -207,6 +201,14 @@ public:
     {
         assert(i < schedules.size() && i >= 0);
         return schedules[i];
+    }
+    void calculateMakespan()
+    {
+        for (auto itr = schedules.begin(); itr != schedules.end(); ++itr)
+        {
+            itr->setMakespan(itr->calcMakespan());
+        }
+
     }
     void print(std::ostream &out = std::cout) const
     {
@@ -256,11 +258,12 @@ public:
 
         job_map = schedules[0].getMatrix();
     }
+
     void calculateFitness()
     {
         for (auto pitr = schedules.begin(); pitr != schedules.end(); ++pitr)
         {
-            pitr->calculateFitness();
+
         }
         //calculate each schedule fitness
     }
@@ -285,6 +288,7 @@ public:
         {
            itr->localSearch();
         }
+        this->calculateFitness();
         std::sort(schedules.begin()+ num_of_parent, schedules.begin()+num_of_parent+num_to_search, [](const Schedule & a, const Schedule & b) -> bool
         {
             return a.getFitness() > b.getFitness();
