@@ -58,6 +58,10 @@ public:
         assert(makespan >= 0);
         return makespan;
     }
+    void calculateFitness()
+    {
+
+    }
     void setFitness(int f)
     {
         fitness = f;
@@ -104,8 +108,10 @@ public:
     void localSearch()
     {
         //do local search
+        int LOCAL_SEARCH_ITERATION=20;
+        this->simulated_annealing(LOCAL_SEARCH_ITERATION);
+        this->calculateFitness();
     }
-
     Schedule& operator=(const Schedule& rhs)
     {
         const_cast<int&>(jobs) = rhs.jobs;
@@ -122,7 +128,7 @@ private:
     int makespan;
     Matrix matrix;
 
-    int simulated_annealing(int iteration_n)
+    void simulated_annealing(int iteration_n)
     {
         Schedule sa(*this);
 
@@ -174,8 +180,7 @@ private:
             //printf("temperature:%f\n", temperature);
             //fgetc(stdin);
         }
-
-        return sa.getMakespan();
+        //sa.getMakespan();
     }
 };
 
@@ -253,6 +258,10 @@ public:
     }
     void calculateFitness()
     {
+        for (auto pitr = schedules.begin(); pitr != schedules.end(); ++pitr)
+        {
+            pitr->calculateFitness();
+        }
         //calculate each schedule fitness
     }
     void genChildren()
@@ -270,13 +279,20 @@ public:
         // (1,1)
         // else
     }
-    void localSearch(int num_to_search)
+    void localSearch(int num_to_search,int num_of_parent)
     {
+        for(auto itr=schedules.begin()+num_of_parent;itr!=schedules.begin()+num_of_parent+num_to_search;++itr)
+        {
+           itr->localSearch();
+        }
+        std::sort(schedules.begin()+ num_of_parent, schedules.begin()+num_of_parent+num_to_search, [](const Schedule & a, const Schedule & b) -> bool
+        {
+            return a.getFitness() > b.getFitness();
+        });
+        // change to original fitness
         // SA search for each
         // calculate fitness
     }
-
-
     void sortParents(int num_of_parent)
     {
         std::sort(schedules.begin(), schedules.begin() + num_of_parent, [](const Schedule & a, const Schedule & b) -> bool
@@ -284,9 +300,12 @@ public:
             return a.getFitness() > b.getFitness();
         });
     }
-    void sortChildren()
+    void sortChildren(int num_of_parent)
     {
-
+       std::sort(schedules.begin()+num_of_parent, schedules.end(), [](const Schedule & a, const Schedule & b) -> bool
+       {
+            return a.getFitness() > b.getFitness();
+       });
     }
     void sortPopulation()
     {
