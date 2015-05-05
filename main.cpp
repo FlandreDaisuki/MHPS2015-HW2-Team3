@@ -27,7 +27,10 @@ int main(int argc, char const *argv[])
             parent.localSearch(POPULATION_SIZE,LOCAL_SEARCH_CHILDREN);
             //local search also calculate fitness
         }
-        parent.calculateFitness();
+        else
+        {
+           parent.calculateFitness();
+        }
     }
     return 0;
 }

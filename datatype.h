@@ -282,17 +282,13 @@ public:
         // (1,1)
         // else
     }
-    void localSearch(int num_to_search,int num_of_parent)
+    void localSearch(int num_to_search)
     {
-        for(auto itr=schedules.begin()+num_of_parent;itr!=schedules.begin()+num_of_parent+num_to_search;++itr)
+        for(auto itr=schedules.begin();itr!=schedules.begin()+num_to_search;++itr)
         {
            itr->localSearch();
         }
         this->calculateFitness();
-        std::sort(schedules.begin()+ num_of_parent, schedules.begin()+num_of_parent+num_to_search, [](const Schedule & a, const Schedule & b) -> bool
-        {
-            return a.getFitness() > b.getFitness();
-        });
         // change to original fitness
         // SA search for each
         // calculate fitness
