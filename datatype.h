@@ -268,7 +268,7 @@ public:
         }
         for (auto pitr = schedules.begin(); pitr != schedules.end(); ++pitr)
         {
-            pitr->setFitness(worst_case-pitr->getMakespan());       //makespan越小 fitness 越大
+            pitr->setFitness(worst_case - pitr->getMakespan());       //makespan越小 fitness 越大
         }
 
     }
