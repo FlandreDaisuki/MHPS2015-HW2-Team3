@@ -22,7 +22,7 @@ int main(int argc, char const *argv[])
         parent.calculateMakespan();
         parent.envSelection();
         parent.sortPopulation();
-        
+
         if (pitr % LOCAL_SEARCH_FREQUENCY == 0)
         {
             parent.localSearch(LOCAL_SEARCH_CHILDREN);
@@ -30,7 +30,7 @@ int main(int argc, char const *argv[])
         }
         else
         {
-           parent.calculateFitness();
+            parent.calculateFitness();
         }
     }
     return 0;
