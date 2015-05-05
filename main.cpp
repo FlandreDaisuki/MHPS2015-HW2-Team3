@@ -24,7 +24,7 @@ int main(int argc, char const *argv[])
         parent.sortPopulation();
         if (pitr % LOCAL_SEARCH_FREQUENCY == 0)
         {
-            parent.localSearch(POPULATION_SIZE,LOCAL_SEARCH_CHILDREN);
+            parent.localSearch(LOCAL_SEARCH_CHILDREN);
             //local search also calculate fitness
         }
         else
