@@ -264,7 +264,7 @@ public:
         int worst_case=0;
         for (auto pitr = schedules.begin(); pitr != schedules.end(); ++pitr)
         {
-            worst_case=max(worst_case,pitr->getMakespan());
+            worst_case=std::max(worst_case,pitr->getMakespan());
         }
         for (auto pitr = schedules.begin(); pitr != schedules.end(); ++pitr)
         {
