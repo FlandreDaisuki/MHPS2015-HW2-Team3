@@ -11,6 +11,7 @@
 #include <ostream>
 #include <fstream>
 #include <algorithm>
+#include <limits>
 
 /* Nameing Guide *************/
 /*                           */
@@ -103,8 +104,7 @@ public:
     }
     void localSearch()
     {
-        //do local search
-        this->simulated_annealing(LOCAL_SEARCH_ITERATION);
+        makespan=(this->simulated_annealing(LOCAL_SEARCH_ITERATION));
     }
     Schedule& operator=(const Schedule& rhs)
     {
@@ -174,7 +174,7 @@ private:
             //printf("temperature:%f\n", temperature);
             //fgetc(stdin);
         }
-        sa.getMakespan();
+        return sa.getMakespan();
     }
 };
 
@@ -261,11 +261,16 @@ public:
 
     void calculateFitness()
     {
+        int worst_case=0;
         for (auto pitr = schedules.begin(); pitr != schedules.end(); ++pitr)
         {
-
+            worst_case=max(worst_case,pitr->getMakespan());
         }
-        //calculate each schedule fitness
+        for (auto pitr = schedules.begin(); pitr != schedules.end(); ++pitr)
+        {
+            pitr->setFitness(worst_case-pitr->getMakespan());       //makespan越小 fitness 越大
+        }
+
     }
     void genChildren()
     {
