@@ -21,6 +21,7 @@ int main(int argc, char const *argv[])
     {
         parent.genChildren();
         parent.envSelection();
+        //sort by fitness
         if (pitr % LOCAL_SEARCH_FREQUENCY == 0)
         {
             parent.localSearch(LOCAL_SEARCH_CHILDREN);
