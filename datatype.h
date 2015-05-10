@@ -272,8 +272,9 @@ public:
         }
 
     }
-    void genChildren()
+    void genChildren(int num_of_parent,int num_of_children)
     {
+
         //select betters {輪盤法,window,...} depend on fitness
         //elitism
         //crossover {1 point, 2 point,....}
@@ -289,14 +290,21 @@ public:
     }
     void localSearch(int num_to_search)
     {
-        for (auto itr = schedules.begin(); itr != schedules.begin() + num_to_search; ++itr)
+        std::vector <int> temp_makespan(num_to_search);
+        int i=0;
+        for(auto itr=schedules.begin();itr!=schedules.begin()+num_to_search;++itr)
         {
-            itr->localSearch();
+           temp_makespan[i]=itr->getMakespan();
+           ++i;
+           itr->localSearch();
         }
         this->calculateFitness();
-        // change to original fitness
-        // SA search for each
-        // calculate fitness
+        i=0;
+        for(auto itr=schedules.begin();itr!=schedules.begin()+num_to_search;++itr)
+        {
+           itr->setMakespan(temp_makespan[i]);
+           ++i;
+        }
     }
     void sortParents(int num_of_parent)
     {
