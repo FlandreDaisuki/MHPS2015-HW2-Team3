@@ -10,6 +10,7 @@ int main(int argc, char const *argv[])
     parent.print();
     parent.calculateMakespan();
     parent.calculateFitness();
+
     for (int pitr = 0; pitr < POPULATION_ITERATION; ++pitr)
     {
         /*
@@ -36,7 +37,7 @@ int main(int argc, char const *argv[])
         */
         parent.sortPopulation();
         /*
-        After sortPopulation, we can get sorted-by-fitness makespan-correct population, fitness correct as well. 
+        After sortPopulation, we can get sorted-by-fitness makespan-correct population, fitness correct as well.
         */
         if (pitr % LOCAL_SEARCH_FREQUENCY == 0)
         {
