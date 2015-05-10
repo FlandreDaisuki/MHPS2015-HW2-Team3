@@ -297,9 +297,18 @@ public:
     void envSelection()
     {
         // 已知前半是parent 後半是children
-        // 2/4
-        // (1,1)
-        // else
+        this->env2_4();
+    }
+    void env2_4()
+    {
+        //The method is sort both parent and children
+        //Then pick who has best makespan as new population
+        std::sort(schedules.begin(), schedules.end(), [](const Schedule & a, const Schedule & b) -> bool
+        {
+            return a.getMakespan() < b.getMakespan();
+        });
+
+        schedules.erase(schedules.begin() + POPULATION_SIZE, schedules.end());
     }
     void localSearch(int num_to_search)
     {
