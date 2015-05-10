@@ -281,7 +281,7 @@ public:
     }
     void genChildren(int parent_produce_num)
     {
-        vector <Schedule> parents;
+        std::vector <Schedule> parents;
         //select betters {輪盤法,window,...} depend on fitness
         select_parent(parents,parent_produce_num);
         //elitism
@@ -289,9 +289,10 @@ public:
         //mutation
         //add to this population
     }
-    void select_parent(vector <Schedule> &parent,int parent_produce_num)
+    void select_parent(std::vector <Schedule> &parent,int parent_produce_num)
     {
-        int group_start_index[POPULATION_SIZE],rand_num,total_fitness,index;
+        int group_start_index[POPULATION_SIZE],total_fitness,index;
+        double rand_num;
         group_start_index[0]=0;
         total_fitness=schedules[0].getFitness();
         for(int i=1;i<POPULATION_SIZE;++i)
@@ -299,13 +300,13 @@ public:
             group_start_index[i]=group_start_index[i-1]+schedules[i-1].getFitness();
             total_fitness+=schedules[i].getFitness();
         }
-        rand_num=(int)((double)total_fitness*0.5/parent_produce_num);
+        rand_num=(double)total_fitness*0.5/parent_produce_num;
         index=0;
         for(int i=0;i<parent_produce_num;++i)
         {
-            for(;index<POPULATION_SIZE && group_start_index[index]<=rand_num;++index);
+            for(;index<POPULATION_SIZE && (double)group_start_index[index]<=rand_num;++index);
             parent.push_back(schedules[index-1]);
-            rand_num+=(int)((double)total_fitness/parent_produce_num);
+            rand_num+=(double)total_fitness/parent_produce_num;
         }
     }
     void envSelection()

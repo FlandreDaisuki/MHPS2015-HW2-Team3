@@ -17,7 +17,8 @@ int main(int argc, char const *argv[])
         When pitr == 0, Makespan and Fitness correct.
         Here Fitness should be EXACTLY correct.
         */
-        parent.genChildren();
+        int num_parent_produce;
+        parent.genChildren(num_parent_produce);
         /*
         After genChildren, Children Makespan is not correct and Fitness not.
         */
