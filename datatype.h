@@ -22,7 +22,14 @@
 /*****************************/
 
 typedef std::vector< std::vector<int> > Matrix;
+
 const int LOCAL_SEARCH_ITERATION = 1000; // iterations of local search
+const int POPULATION_SIZE = 20; //MA演算法中親代個數
+const int POPULATION_CHILDREN_SIZE = 20; //MA演算法中子代個數
+const int POPULATION_ITERATION = 1000; //GA演算法的代數
+const int LOCAL_SEARCH_FREQUENCY = 100; //每這麼多次做一次Local Search
+const int LOCAL_SEARCH_CHILDREN = 5; // how many children to do Local Search after envSelection()
+
 ///一個無編碼的排程，一個解序列
 class Schedule
 {
@@ -104,7 +111,7 @@ public:
     }
     void localSearch()
     {
-        makespan = (this->simulated_annealing(LOCAL_SEARCH_ITERATION));
+        makespan = (this->simulated_annealing());
     }
     Schedule& operator=(const Schedule& rhs)
     {
@@ -122,7 +129,7 @@ private:
     int makespan;
     Matrix matrix;
 
-    int simulated_annealing(int iteration_n)
+    int simulated_annealing()
     {
         Schedule sa(*this);
 
@@ -133,7 +140,7 @@ private:
         const double COOLDOWN = 0.99; //cool down every iterations
 
         double temperature = INIT_T;
-        for (int iter = 0; iter < iteration_n  && temperature > TERM_T ; ++iter)
+        for (int iter = 0; iter < POPULATION_ITERATION  && temperature > TERM_T ; ++iter)
         {
             int xbefore = sa.getMakespan();
 
@@ -272,8 +279,14 @@ public:
         }
 
     }
-    void genChildren(int num_of_parent,int num_of_children)
+    void genChildren()
     {
+        /*
+        you can get num of parent by const global variable POPULATION_SIZE
+        and num of children by POPULATION_CHILDREN_SIZE
+        the declaration at line 27, 28
+        */
+
 
         //select betters {輪盤法,window,...} depend on fitness
         //elitism
@@ -291,19 +304,19 @@ public:
     void localSearch(int num_to_search)
     {
         std::vector <int> temp_makespan(num_to_search);
-        int i=0;
-        for(auto itr=schedules.begin();itr!=schedules.begin()+num_to_search;++itr)
+        int i = 0;
+        for (auto itr = schedules.begin(); itr != schedules.begin() + num_to_search; ++itr)
         {
-           temp_makespan[i]=itr->getMakespan();
-           ++i;
-           itr->localSearch();
+            temp_makespan[i] = itr->getMakespan();
+            ++i;
+            itr->localSearch();
         }
         this->calculateFitness();
-        i=0;
-        for(auto itr=schedules.begin();itr!=schedules.begin()+num_to_search;++itr)
+        i = 0;
+        for (auto itr = schedules.begin(); itr != schedules.begin() + num_to_search; ++itr)
         {
-           itr->setMakespan(temp_makespan[i]);
-           ++i;
+            itr->setMakespan(temp_makespan[i]);
+            ++i;
         }
     }
     void sortParents(int num_of_parent)
@@ -338,6 +351,5 @@ public:
 private:
     std::vector<Schedule> schedules;
     Matrix job_map;
-
 };
 
