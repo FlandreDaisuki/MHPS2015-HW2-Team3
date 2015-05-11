@@ -285,31 +285,31 @@ public:
         std::vector <Schedule> children;
         int elitism_num;
         //select betters {輪盤法,window,...} depend on fitness
-        select_parent(parents,parent_produce_num);
-        elitism_num=elitism(parents,children);
-        crossover(parents,children);
+        select_parent(parents, parent_produce_num);
+        elitism_num = elitism(parents, children);
+        crossover(parents, children);
         mutation(children);
-        int i=0;
-        for(auto itr=children.begin();i<POPULATION_SIZE-elitism_num;++itr)
+        int i = 0;
+        for (auto itr = children.begin(); i < POPULATION_SIZE - elitism_num; ++itr)
         {
             schedules.push_back(*itr);
             ++i;
         }
     }
-    int elitism(std::vector <Schedule> parents,std::vector <Schedule> children)
+    int elitism(std::vector <Schedule> parents, std::vector <Schedule> children)
     {
         std::sort(parents.begin(), parents.begin() + POPULATION_SIZE , [](const Schedule & a, const Schedule & b) -> bool
         {
             return a.getFitness() > b.getFitness();
         });
-        int elitism_num=rand()%3;
-        for(int i=0;i<elitism_num;++i)
+        int elitism_num = rand() % 3;
+        for (int i = 0; i < elitism_num; ++i)
         {
             schedules.push_back(parents[i]);
         }
         return elitism_num;
     }
-    void crossover(std::vector <Schedule> parents,std::vector <Schedule> children)
+    void crossover(std::vector <Schedule> parents, std::vector <Schedule> children)
     {
 
     }
@@ -317,24 +317,24 @@ public:
     {
 
     }
-    void select_parent(std::vector <Schedule> &parent,int parent_produce_num)
+    void select_parent(std::vector <Schedule> &parent, int parent_produce_num)
     {
-        int group_start_index[POPULATION_SIZE],total_fitness,index;
+        int group_start_index[POPULATION_SIZE], total_fitness, index;
         double rand_num;
-        group_start_index[0]=0;
-        total_fitness=schedules[0].getFitness();
-        for(int i=1;i<POPULATION_SIZE;++i)
+        group_start_index[0] = 0;
+        total_fitness = schedules[0].getFitness();
+        for (int i = 1; i < POPULATION_SIZE; ++i)
         {
-            group_start_index[i]=group_start_index[i-1]+schedules[i-1].getFitness();
-            total_fitness+=schedules[i].getFitness();
+            group_start_index[i] = group_start_index[i - 1] + schedules[i - 1].getFitness();
+            total_fitness += schedules[i].getFitness();
         }
-        rand_num=(double)total_fitness*0.5/parent_produce_num;
-        index=0;
-        for(int i=0;i<parent_produce_num;++i)
+        rand_num = (double)total_fitness * 0.5 / parent_produce_num;
+        index = 0;
+        for (int i = 0; i < parent_produce_num; ++i)
         {
-            for(;index<POPULATION_SIZE && (double)group_start_index[index]<=rand_num;++index);
-            parent.push_back(schedules[index-1]);
-            rand_num+=(double)total_fitness/parent_produce_num;
+            for (; index < POPULATION_SIZE && (double)group_start_index[index] <= rand_num; ++index);
+            parent.push_back(schedules[index - 1]);
+            rand_num += (double)total_fitness / parent_produce_num;
         }
     }
     void envSelection()
