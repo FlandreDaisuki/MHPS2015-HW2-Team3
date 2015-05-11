@@ -282,12 +282,41 @@ public:
     void genChildren(int parent_produce_num)
     {
         std::vector <Schedule> parents;
+        std::vector <Schedule> children;
+        int elitism_num;
         //select betters {輪盤法,window,...} depend on fitness
         select_parent(parents, parent_produce_num);
-        //elitism
-        //crossover {1 point, 2 point,....}
-        //mutation
-        //add to this population
+
+        elitism_num = elitism(parents, children);
+        crossover(parents, children);
+        mutation(children);
+        int i = 0;
+        for (auto itr = children.begin(); i < POPULATION_SIZE - elitism_num; ++itr)
+        {
+            schedules.push_back(*itr);
+            ++i;
+        }
+    }
+    int elitism(std::vector <Schedule> parents, std::vector <Schedule> children)
+    {
+        std::sort(parents.begin(), parents.begin() + POPULATION_SIZE , [](const Schedule & a, const Schedule & b) -> bool
+        {
+            return a.getFitness() > b.getFitness();
+        });
+        int elitism_num = rand() % 3;
+        for (int i = 0; i < elitism_num; ++i)
+        {
+            schedules.push_back(parents[i]);
+        }
+        return elitism_num;
+    }
+    void crossover(std::vector <Schedule> parents, std::vector <Schedule> children)
+    {
+
+    }
+    void mutation( std::vector <Schedule> &children)
+    {
+
     }
     void select_parent(std::vector <Schedule> &parent, int parent_produce_num)
     {
