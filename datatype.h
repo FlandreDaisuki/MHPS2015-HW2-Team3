@@ -290,11 +290,10 @@ public:
         elitism_num = elitism(parents, children);
         crossover(parents, children);
         mutation(children);
-        int i = 0;
-        for (auto itr = children.begin(); i < POPULATION_SIZE - elitism_num; ++itr)
+
+        for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
         {
-            schedules.push_back(*itr);
-            ++i;
+            schedules.push_back(children[i]);
         }
     }
     int elitism(std::vector <Schedule> parents, std::vector <Schedule> children)
@@ -314,7 +313,7 @@ public:
     {
 
     }
-    void mutation( std::vector <Schedule> &children)
+    void mutation(std::vector <Schedule> &children)
     {
 
     }
