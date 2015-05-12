@@ -49,6 +49,10 @@ public:
     {
         return matrix;
     }
+    Matrix &getMatrix() const
+    {
+        return const_cast<Schedule*>(this)->matrix;
+    }
     int getJobs() const
     {
         return jobs;
@@ -176,10 +180,6 @@ private:
             }
 
             temperature *= COOLDOWN;
-
-            //sa.print();
-            //printf("temperature:%f\n", temperature);
-            //fgetc(stdin);
         }
         return sa.getMakespan();
     }
@@ -392,13 +392,32 @@ public:
             return a.getFitness() > b.getFitness();
         });
     }
-    std::vector<int> scheduleToJob(const Schedule &s)
+    std::vector<int> scheduleToJob(const Schedule &s) const
     {
         // Schedule encode to job vector
+        std::vector<int> ret;
+        for (auto itr = s.getMatrix().begin(); itr != s.getMatrix().end(); ++itr)
+        {
+            for (size_t i = 0; i < job_map.size(); i++) {
+                if (*itr == job_map[i])
+                {
+                    ret.push_back(i);
+                    break;
+                }
+            }
+        }
+        return ret;
     }
-    Schedule jobToSchedule(const std::vector<int> &jobv)
+    Schedule jobToSchedule(const std::vector<int> &jobv) const
     {
         // job vector decode to Schedule
+        Matrix m;
+        for (size_t i = 0; i < jobv.size(); ++i)
+        {
+            m.push_back(job_map[i]);
+        }
+        Schedule s(m);
+        return s;
     }
 private:
     std::vector<Schedule> schedules;
