@@ -315,7 +315,27 @@ public:
     }
     void mutation(std::vector <Schedule> &children)
     {
+        int job = children[0].getJobs();
 
+        for (auto itr = children.begin(); itr != children.end(); ++itr)
+        {
+            if (rand() % 10 == 0) // means that 1/10 probability to mutation
+            {
+                int a = rand() % job;
+                int b = rand() % job;
+                while (b == a)
+                {
+                    b = rand() % job;
+                }
+                int c = rand() % job;
+                while (c == a || c == b)
+                {
+                    c = rand() % job;
+                }
+                itr->swapJobs(a,b);
+                itr->swapJobs(b,c);
+            }
+        }
     }
     void select_parent(std::vector <Schedule> &parent, int parent_produce_num)
     {
