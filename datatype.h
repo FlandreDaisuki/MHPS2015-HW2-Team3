@@ -286,19 +286,17 @@ public:
         int elitism_num;
         //select betters {輪盤法,window,...} depend on fitness
         select_parent(parents, parent_produce_num);
-
-        elitism_num = elitism(parents, children);
+        elitism_num = elitism(parents);
         crossover(parents, children);
         mutation(children);
-
         for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
         {
             schedules.push_back(children[i]);
         }
     }
-    int elitism(std::vector <Schedule> parents, std::vector <Schedule> children)
+    int elitism(std::vector <Schedule> &parents)
     {
-        std::sort(parents.begin(), parents.begin() + POPULATION_SIZE , [](const Schedule & a, const Schedule & b) -> bool
+        std::sort(parents.begin(), parents.end() , [](const Schedule & a, const Schedule & b) -> bool
         {
             return a.getFitness() > b.getFitness();
         });
@@ -309,9 +307,41 @@ public:
         }
         return elitism_num;
     }
-    void crossover(std::vector <Schedule> parents, std::vector <Schedule> children)
+    void crossover(std::vector <Schedule> &parents, std::vector <Schedule> &children)
     {
-
+        int job = parents[0].getJobs();
+        std::vector <int> select_parents[2],create_children[2];
+        for(int i=0;i<POPULATION_SIZE;i+=2)
+        {
+           for(int j=0;j<2;++j)
+           {
+               select_parents[j]=scheduleToJob(parents[rand()%parents.size()]);
+               create_children[j].resize(job);
+           }
+           for(int j=0;j<job/2;++j)
+           {
+               for(int k=0;k<2;++k)
+               {
+                  create_children[k][j]=select_parents[k][j];
+               }
+           }
+           for(int k=0;k<2;++k)
+           {
+              for(int index=0,j=job/2+1;j<job;++index)
+              {
+                 if(find(select_parents[k].begin(),select_parents[k].begin()+j,select_parents[!k][index])!=select_parents[k].begin()+j)
+                 {
+                    continue;
+                 }
+                 create_children[k][j]=select_parents[!k][index];
+                 ++j;
+              }
+           }
+           for(int j=0;j<2;++j)
+           {
+             children.push_back(jobToSchedule(create_children[j]));
+           }
+        }
     }
     void mutation(std::vector <Schedule> &children)
     {
