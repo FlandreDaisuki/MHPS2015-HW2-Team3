@@ -12,14 +12,14 @@ int main(int argc, char const *argv[])
     parent.calculateFitness();
     for (int pitr = 0; pitr < POPULATION_ITERATION; ++pitr)
     {
-        cout<<"generation "<<pitr<<endl;
+        cout << "generation " << pitr << endl;
         /*
         When pitr == 0, Makespan and Fitness correct.
         Here Fitness should be EXACTLY correct.
         */
-        int num_parent_produce=10;
+        int num_parent_produce = 10;
         parent.genChildren(num_parent_produce);
-           /*
+        /*
         After genChildren, Children Makespan is not correct and Fitness not.
         */
         parent.calculateMakespan();
@@ -48,7 +48,8 @@ int main(int argc, char const *argv[])
             Both makespan and fitness are correct but unordered.
             */
         }
-        //parent.print();
+        parent.print();
+        system("pause");
         /*
         No matter what we do, Fitness SHOULD BE CORRECT HERE!!!!
         */
