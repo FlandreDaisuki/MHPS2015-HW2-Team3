@@ -12,6 +12,7 @@
 #include <fstream>
 #include <algorithm>
 #include <limits>
+#include <time.h>
 
 /* Nameing Guide *************/
 /*                           */
@@ -286,19 +287,17 @@ public:
         int elitism_num;
         //select betters {輪盤法,window,...} depend on fitness
         select_parent(parents, parent_produce_num);
-
-        elitism_num = elitism(parents, children);
+        elitism_num = elitism(parents);
         crossover(parents, children);
         mutation(children);
-
         for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
         {
             schedules.push_back(children[i]);
         }
     }
-    int elitism(std::vector <Schedule> parents, std::vector <Schedule> children)
+    int elitism(std::vector <Schedule> &parents)
     {
-        std::sort(parents.begin(), parents.begin() + POPULATION_SIZE , [](const Schedule & a, const Schedule & b) -> bool
+        std::sort(parents.begin(), parents.end() , [](const Schedule & a, const Schedule & b) -> bool
         {
             return a.getFitness() > b.getFitness();
         });
@@ -309,9 +308,67 @@ public:
         }
         return elitism_num;
     }
-    void crossover(std::vector <Schedule> parents, std::vector <Schedule> children)
+    void crossover(std::vector <Schedule> &parents, std::vector <Schedule> &children)
     {
-
+        srand(time(0));
+        int job, rand_start;
+        std::vector <int> select_parents[2], create_children[2], already_add[2];
+        job = parents[0].getJobs();
+        for (int i = 0; i < POPULATION_SIZE; i += 2) //一次產生2children
+        {
+            for (int j = 0; j < 2; ++j)  //選父母設定
+            {
+                select_parents[j] = scheduleToJob(parents[rand() % parents.size()]);
+                create_children[j].resize(job);
+            }
+            rand_start = (rand() % (job / 2));
+            for (int j = rand_start; j < rand_start + job / 2; ++j) //隨機保留一段
+            {
+                for (int k = 0; k < 2; ++k)
+                {
+                    create_children[k][j] = select_parents[k][j];
+                    already_add[k].push_back(select_parents[k][j]);
+                }
+            }
+            for (int k = 0; k < 2; ++k)
+            {
+                int index = 0;
+                for (int j = 0; j < rand_start; ++j) //設定前半部
+                {
+                    int search_job;
+                    while (index < job)
+                    {
+                        search_job = select_parents[!k][index];  //從對面挑一個出來看有沒有重複
+                        if (find(already_add[k].begin(), already_add[k].end(), search_job) == already_add[k].end()) //還沒加入的工作
+                        {
+                            break;
+                        }
+                        index++;
+                    }
+                    create_children[k][j] = search_job;
+                    already_add[k].push_back(search_job);
+                }
+                for (int j = rand_start + job / 2; j < job; ++j) //設定後半部
+                {
+                    int search_job;
+                    while (index < job)
+                    {
+                        search_job = select_parents[!k][index];
+                        if (find(already_add[k].begin(), already_add[k].end(), search_job) == already_add[k].end())
+                        {
+                            break;
+                        }
+                        index++;
+                    }
+                    create_children[k][j] = search_job;
+                    already_add[k].push_back(search_job);
+                }
+            }
+            for (int j = 0; j < 2; ++j)
+            {
+                children.push_back(jobToSchedule(create_children[j]));
+            }
+        }
     }
     void mutation(std::vector <Schedule> &children)
     {
@@ -332,8 +389,8 @@ public:
                 {
                     c = rand() % job;
                 }
-                itr->swapJobs(a,b);
-                itr->swapJobs(b,c);
+                itr->swapJobs(a, b);
+                itr->swapJobs(b, c);
             }
         }
     }
