@@ -1,25 +1,24 @@
 #include <iostream>
 #include "datatype.h"
-
+#include <time.h>
 using namespace std;
 
 int main(int argc, char const *argv[])
 {
+    srand(time(0));
     Population parent;
-    parent.readInitialPopulation("testdata.txt");
+    parent.readInitialPopulation("one_testdata.txt");
     parent.print();
     parent.calculateMakespan();
     parent.calculateFitness();
     for (int pitr = 0; pitr < POPULATION_ITERATION; ++pitr)
     {
-        cout << "generation " << pitr << endl;
-        /*
+         /*
         When pitr == 0, Makespan and Fitness correct.
         Here Fitness should be EXACTLY correct.
         */
-        int num_parent_produce = 10;
-        parent.genChildren(num_parent_produce);
-        /*
+        parent.genChildren();
+           /*
         After genChildren, Children Makespan is not correct and Fitness not.
         */
         parent.calculateMakespan();
@@ -49,7 +48,6 @@ int main(int argc, char const *argv[])
             */
         }
         parent.print();
-        system("pause");
         /*
         No matter what we do, Fitness SHOULD BE CORRECT HERE!!!!
         */
