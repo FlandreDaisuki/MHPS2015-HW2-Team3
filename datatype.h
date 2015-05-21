@@ -239,7 +239,7 @@ public:
     //Member Functions
     void readPopulationBase(const char* filename)
     {
-        //this function is for testing data
+        //this function is for reading data
         std::fstream fin;
         fin.open(filename);
         if (!fin.is_open())
@@ -259,7 +259,7 @@ public:
            }
         }
         schedules.push_back(s);
-        job_map = schedules[0].getMatrix();
+        job_map = s.getMatrix();
         InitialPopulation();
     }
     void readInitialPopulation(const char* filename)
@@ -267,7 +267,6 @@ public:
         //this function is for testing data
         std::fstream fin;
         fin.open(filename);
-
         if (!fin.is_open())
         {
             std::cout << "Fail to open file." << std::endl;
@@ -311,9 +310,7 @@ public:
             preserve.push_back(schedules[i]);
         }
         schedules=preserve;
-        job_map = schedules[0].getMatrix();
     }
-
     void calculateFitness()
     {
         int worst_case = 0;
