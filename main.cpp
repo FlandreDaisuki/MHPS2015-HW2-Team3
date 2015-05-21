@@ -9,6 +9,7 @@ int main(int argc, char const *argv[])
     Population parent;
     //parent.readInitialPopulation("testdata.txt");
     parent.readPopulationBase("one_testdata.txt");
+    parent.InitialPopulation();
     parent.print();
     parent.calculateMakespan();
     parent.calculateFitness();
@@ -48,11 +49,9 @@ int main(int argc, char const *argv[])
             Both makespan and fitness are correct but unordered.
             */
         }
-        //parent.print();
         /*
         No matter what we do, Fitness SHOULD BE CORRECT HERE!!!!
         */
     }
-    parent.print();
     return 0;
 }

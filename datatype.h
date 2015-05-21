@@ -260,7 +260,6 @@ public:
         }
         schedules.push_back(s);
         job_map = s.getMatrix();
-        InitialPopulation();
     }
     void readInitialPopulation(const char* filename)
     {
@@ -293,23 +292,24 @@ public:
     }
     void InitialPopulation()
     {
-        //read initial base schedule
         //generate a set of better population
         //3 is magic number
-        //select odd
-        std::vector <Schedule> preserve;
+        //select even
+        std::vector <Schedule> parent_set;
         Schedule s(schedules[0]);
-        for(int i=1;i<POPULATION_SIZE*3;++i)
+        for(int i=0;i<POPULATION_SIZE*3;++i)
         {
             s.shuffle();
-            schedules.push_back(s);
+            parent_set.push_back(s);
         }
-        this->sortPopulation();
+        std::sort(parent_set.begin(), parent_set.end() , [](const Schedule & a, const Schedule & b) -> bool
+        {
+            return a.getFitness() > b.getFitness();
+        });
         for(int i=0;i<POPULATION_SIZE*2;i+=2)
         {
-            preserve.push_back(schedules[i]);
+            schedules.push_back(parent_set[i]);
         }
-        schedules=preserve;
     }
     void calculateFitness()
     {
