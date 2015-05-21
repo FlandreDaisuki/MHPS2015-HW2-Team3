@@ -10,9 +10,8 @@ int main(int argc, char const *argv[])
     //parent.readInitialPopulation("testdata.txt");
     parent.readPopulationBase("one_testdata.txt");
     parent.InitialPopulation();
-    parent.print();
-    parent.calculateMakespan();
     parent.calculateFitness();
+    parent.print();
     for (int pitr = 0; pitr < POPULATION_ITERATION; ++pitr)
     {
          /*

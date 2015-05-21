@@ -297,16 +297,18 @@ public:
         //select even
         std::vector <Schedule> parent_set;
         Schedule s(schedules[0]);
+        schedules[0].setMakespan(schedules[0].calcMakespan());
         for(int i=0;i<POPULATION_SIZE*3;++i)
         {
             s.shuffle();
+            s.setMakespan(s.calcMakespan());
             parent_set.push_back(s);
         }
         std::sort(parent_set.begin(), parent_set.end() , [](const Schedule & a, const Schedule & b) -> bool
         {
-            return a.getFitness() > b.getFitness();
+            return a.getMakespan() < b.getMakespan();
         });
-        for(int i=0;i<POPULATION_SIZE*2;i+=2)
+        for(int i=2;i<POPULATION_SIZE*2;i+=2)
         {
             schedules.push_back(parent_set[i]);
         }
