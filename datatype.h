@@ -236,8 +236,32 @@ public:
             itr->print(out);
         }
     }
-
     //Member Functions
+    void readPopulationBase(const char* filename)
+    {
+        //this function is for testing data
+        std::fstream fin;
+        fin.open(filename);
+        if (!fin.is_open())
+        {
+            std::cout << "Fail to open file." << std::endl;
+            return;
+        }
+
+        int jobs_n, machines_n;
+        fin >> jobs_n >> machines_n;
+        Schedule s(jobs_n, machines_n);
+        for (int mn = 0; mn < machines_n; ++mn)
+        {
+           for (int jn = 0; jn < jobs_n; ++jn)
+           {
+               fin >> s.getMatrix()[jn][mn];
+           }
+        }
+        schedules.push_back(s);
+        job_map = schedules[0].getMatrix();
+        InitialPopulation();
+    }
     void readInitialPopulation(const char* filename)
     {
         //this function is for testing data
@@ -267,7 +291,6 @@ public:
         }
 
         job_map = schedules[0].getMatrix();
-        InitialPopulation();
     }
     void InitialPopulation()
     {

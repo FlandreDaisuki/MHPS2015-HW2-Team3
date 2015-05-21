@@ -7,7 +7,8 @@ int main(int argc, char const *argv[])
 {
     srand(time(0));
     Population parent;
-    parent.readInitialPopulation("one_testdata.txt");
+    //parent.readInitialPopulation("testdata.txt");
+    parent.readPopulationBase("one_testdata.txt");
     parent.print();
     parent.calculateMakespan();
     parent.calculateFitness();
@@ -47,7 +48,7 @@ int main(int argc, char const *argv[])
             Both makespan and fitness are correct but unordered.
             */
         }
-        parent.print();
+        //parent.print();
         /*
         No matter what we do, Fitness SHOULD BE CORRECT HERE!!!!
         */
