@@ -160,7 +160,7 @@ private:
 
 		double temperature = INIT_T;
 
-		for (int iter = 0; iter < POPULATION_ITERATION  && temperature > TERM_T ; ++iter)
+		for (int iter = 0; iter < LOCAL_SEARCH_ITERATION   && temperature > TERM_T ; ++iter)
 		{
 			int xbefore = sa.getMakespan();
 
@@ -368,12 +368,18 @@ public:
 		{
 			return a.getFitness() > b.getFitness();
 		});
-		int elitism_num = rand() % 3;
-
-		for (int i = 0; i < elitism_num; ++i)
-		{
-			schedules.push_back(parents[i]);
-		}
+		int elitism_parameter,elitism_num=0;
+		elitism_parameter=rand()%100;
+		if(elitism_parameter<20)       //20% 保留第一個
+        {
+            schedules.push_back(parents[0]);
+            elitism_num++;
+        }
+        if(elitism_parameter<10)       //10% 保留第二個
+        {
+            schedules.push_back(parents[1]);
+            elitism_num++;
+        }
 		return elitism_num;
 	}
 	void crossover(std::vector <Schedule> &parents, std::vector <Schedule> &children)
