@@ -47,7 +47,7 @@ int main(int argc, char const *argv[])
         cout<<endl;
 		if (pitr % LOCAL_SEARCH_FREQUENCY == 0)
 		{
-			//parent.localSearch(LOCAL_SEARCH_CHILDREN);
+			parent.localSearch(LOCAL_SEARCH_CHILDREN);
 			/*
 			After localSearch, Fitness re-calculated.
 			Both makespan and fitness are correct but unordered.

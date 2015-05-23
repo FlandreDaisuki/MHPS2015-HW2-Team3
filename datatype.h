@@ -357,10 +357,11 @@ public:
             children[i].print();
         }*/
 		mutation(children);
-		for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
+		for (int i = 0; i < POPULATION_SIZE - this->elitism_num; ++i)
 		{
 			schedules.push_back(children[i]);
 		}
+
 	}
 	void elitism(std::vector <Schedule> &parents)
 	{
