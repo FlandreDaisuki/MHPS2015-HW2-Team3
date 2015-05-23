@@ -278,8 +278,8 @@ public:
 		}
 
 		int jobs_n, machines_n, schedules_n;
+		Schedule s(jobs_n, machines_n);
 		fin >> jobs_n >> machines_n >> schedules_n;
-
 		for (int sn = 0; sn < schedules_n; ++sn)
 		{
 			Schedule s(jobs_n, machines_n);
@@ -345,8 +345,17 @@ public:
 		int elitism_num, parent_produce_num = 10;
 		//select betters {輪盤法,window,...} depend on fitness
 		select_parent(parents, parent_produce_num);
+
+		/*for(int i=0;i<parents.size();++i)
+        {
+            parents[i].print();
+        }*/
 	    elitism_num = elitism(parents);
 		crossover(parents, children);
+		/*for(int i=0;i<children.size();++i)
+        {
+            children[i].print();
+        }*/
 		mutation(children);
 		for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
 		{
@@ -372,30 +381,26 @@ public:
 		int job, rand_start;
 		job = parents[0].getJobs();
 		std::vector <int> select_parents[2], already_add[2], create_children[2];
-
 		for (int Set = 0; Set < 2; ++Set)
 		{
 			create_children[Set].resize(job);
 		}
-
 		for (int i = 0; i < POPULATION_SIZE; i += 2) //一次產生2children
 		{
 			for (int Set = 0; Set < 2; ++Set)  //選父母設定
 			{
 				select_parents[Set] = scheduleToJob(parents[rand() % parents.size()]);
 			}
-
 			rand_start = (rand() % (job / 2));
-
 			for (int Set = 0; Set < 2; ++Set)
 			{
+			    already_add[Set].clear();
 				for (int j = rand_start; j < rand_start + job / 2; ++j) //隨機保留一段
 				{
 					create_children[Set][j] = select_parents[Set][j];
 					already_add[Set].push_back(select_parents[Set][j]);
 				}
 			}
-
 			for (int Set = 0; Set < 2; ++Set)
 			{
 				int index = 0;
@@ -414,13 +419,12 @@ public:
 						}
 
 						index++;
+
 					}
-
 					create_children[Set][j] = search_job;
-					already_add[Set].push_back(search_job);
-				}
-
-				for (int j = rand_start + job / 2; j < job; ++j) //設定後半部
+                    already_add[Set].push_back(search_job);
+                }
+                for (int j = rand_start + job / 2; j < job; ++j) //設定後半部
 				{
 					int search_job;
 
@@ -445,7 +449,7 @@ public:
 			{
 				children.push_back(jobToSchedule(create_children[Set]));
 			}
-		}
+        }
 	}
 	void mutation(std::vector <Schedule> &children)
 	{
@@ -589,12 +593,10 @@ public:
 	{
 		// job vector decode to Schedule
 		Matrix m;
-
 		for (size_t i = 0; i < jobv.size(); ++i)
 		{
-			m.push_back(job_map[i]);
+			m.push_back(job_map[jobv[i]]);
 		}
-
 		Schedule s(m);
 		return s;
 	}

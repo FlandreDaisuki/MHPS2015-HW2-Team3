@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
 		Here Fitness should be EXACTLY correct.
 		*/
 		parent.genChildren();
-		/*
+			/*
 		After genChildren, Children Makespan is not correct and Fitness not.
 		*/
 		parent.calculateMakespan();
@@ -42,6 +42,8 @@ int main(int argc, char const *argv[])
 		/*
 		After sortPopulation, we can get sorted-by-fitness makespan-correct population, fitness correct as well.
 		*/
+		parent.printSolutionSimple(cout);
+        cout<<endl;
 		if (pitr % LOCAL_SEARCH_FREQUENCY == 0)
 		{
 			//parent.localSearch(LOCAL_SEARCH_CHILDREN);
@@ -54,7 +56,7 @@ int main(int argc, char const *argv[])
 		No matter what we do, Fitness SHOULD BE CORRECT HERE!!!!
 		*/
 	}
-        parent.printSolutionSimple(cout);
-        cout<<endl;
+    parent.printSolutionSimple(cout);
+    cout<<endl;
 	return 0;
 }
