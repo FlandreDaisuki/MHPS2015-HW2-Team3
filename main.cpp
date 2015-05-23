@@ -47,6 +47,8 @@ int main(int argc, char const *argv[])
         cout<<endl;
 		if (pitr % LOCAL_SEARCH_FREQUENCY == 0)
 		{
+		    std::cout<<"local search\n";
+		    system("pause");
 			parent.localSearch(LOCAL_SEARCH_CHILDREN);
 			/*
 			After localSearch, Fitness re-calculated.
