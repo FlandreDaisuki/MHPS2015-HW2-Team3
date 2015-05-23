@@ -342,7 +342,7 @@ public:
 	{
 		std::vector <Schedule> parents;
 		std::vector <Schedule> children;
-		int elitism_num, parent_produce_num = 10;
+		int parent_produce_num = 10;
 		//select betters {輪盤法,window,...} depend on fitness
 		select_parent(parents, parent_produce_num);
 
@@ -357,7 +357,7 @@ public:
             children[i].print();
         }*/
 		mutation(children);
-		for (int i = 0; i < POPULATION_SIZE - this->elitism_num; ++i)
+		for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
 		{
 			schedules.push_back(children[i]);
 		}
