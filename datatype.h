@@ -160,7 +160,7 @@ private:
 
 		double temperature = INIT_T;
 
-		for (int iter = 0; iter < POPULATION_ITERATION  && temperature > TERM_T ; ++iter)
+		for (int iter = 0; iter < LOCAL_SEARCH_ITERATION   && temperature > TERM_T ; ++iter)
 		{
 			int xbefore = sa.getMakespan();
 
@@ -342,7 +342,7 @@ public:
 	{
 		std::vector <Schedule> parents;
 		std::vector <Schedule> children;
-		int elitism_num, parent_produce_num = 10;
+		int parent_produce_num = 10;
 		//select betters {輪盤法,window,...} depend on fitness
 		select_parent(parents, parent_produce_num);
 
@@ -350,7 +350,7 @@ public:
         {
             parents[i].print();
         }*/
-	    elitism_num = elitism(parents);
+        elitism(parents);
 		crossover(parents, children);
 		/*for(int i=0;i<children.size();++i)
         {
@@ -361,20 +361,27 @@ public:
 		{
 			schedules.push_back(children[i]);
 		}
+
 	}
-	int elitism(std::vector <Schedule> &parents)
+	void elitism(std::vector <Schedule> &parents)
 	{
 		std::sort(parents.begin(), parents.end() , [](const Schedule & a, const Schedule & b) -> bool
 		{
 			return a.getFitness() > b.getFitness();
 		});
-		int elitism_num = rand() % 3;
-
-		for (int i = 0; i < elitism_num; ++i)
-		{
-			schedules.push_back(parents[i]);
-		}
-		return elitism_num;
+		int elitism_parameter;
+		this->elitism_num=0;
+		elitism_parameter=rand()%100;
+		if(elitism_parameter<20)       //20% 保留第一個
+        {
+            schedules.push_back(parents[0]);
+            this->elitism_num+=1;
+        }
+        if(elitism_parameter<10)       //10% 保留第二個
+        {
+            schedules.push_back(parents[1]);
+            this->elitism_num+=1;
+        }
 	}
 	void crossover(std::vector <Schedule> &parents, std::vector <Schedule> &children)
 	{
@@ -515,16 +522,17 @@ public:
 		//The method is sort both parent and children
 		//Then pick who has best makespan as new population
 		std::vector <Schedule> new_generation;
-		for(int i=0;i<POPULATION_SIZE;++i)
+		for(int i=0;i<elitism_num;++i)
         {
-            if(rand()%10>1)          //80%   children
-            {
-                new_generation.push_back(schedules[i+POPULATION_SIZE]);
-            }
-            else                     //20%   parnet
-            {
-                new_generation.push_back(schedules[i]);
-            }
+            new_generation.push_back(schedules[i]);
+        }
+  		for(int i=elitism_num;i<elitism_num+POPULATION_SIZE/5;++i)    //parent的前20%
+        {
+            new_generation.push_back(schedules[i]);
+        }
+        for(int i=POPULATION_SIZE+elitism_num;i<POPULATION_SIZE+elitism_num+4*POPULATION_SIZE/5;++i)    //children的前80%
+        {
+            new_generation.push_back(schedules[i]);
         }
         schedules.clear();
         schedules=new_generation;
@@ -570,6 +578,10 @@ public:
 		{
 			return a.getFitness() > b.getFitness();
 		});
+	}
+	int get_elitism_num()
+	{
+        return elitism_num;
 	}
 	std::vector<int> scheduleToJob(const Schedule &s) const
 	{
@@ -635,5 +647,6 @@ public:
 private:
 	std::vector<Schedule> schedules;
 	Matrix job_map;
+	int elitism_num;
 };
 
