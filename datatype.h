@@ -345,10 +345,9 @@ public:
 		int elitism_num, parent_produce_num = 10;
 		//select betters {輪盤法,window,...} depend on fitness
 		select_parent(parents, parent_produce_num);
-		elitism_num = elitism(parents);
+	    elitism_num = elitism(parents);
 		crossover(parents, children);
 		mutation(children);
-
 		for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
 		{
 			schedules.push_back(children[i]);
@@ -364,9 +363,9 @@ public:
 
 		for (int i = 0; i < elitism_num; ++i)
 		{
+		    std::cout<<parents[i].getFitness()<<"\n";
 			schedules.push_back(parents[i]);
 		}
-
 		return elitism_num;
 	}
 	void crossover(std::vector <Schedule> &parents, std::vector <Schedule> &children)
@@ -504,18 +503,28 @@ public:
 	void envSelection()
 	{
 		// 已知前半是parent 後半是children
+        this->sortChildren();
+        this->sortParents();
 		this->env2_4();
 	}
 	void env2_4()
 	{
 		//The method is sort both parent and children
 		//Then pick who has best makespan as new population
-		std::sort(schedules.begin(), schedules.end(), [](const Schedule & a, const Schedule & b) -> bool
-		{
-			return a.getMakespan() < b.getMakespan();
-		});
-
-		schedules.erase(schedules.begin() + POPULATION_SIZE, schedules.end());
+		std::vector <Schedule> new_generation;
+		for(int i=0;i<POPULATION_SIZE;++i)
+        {
+            if(rand()%10>1)          //80%   children
+            {
+                new_generation.push_back(schedules[i+POPULATION_SIZE]);
+            }
+            else                     //20%   parnet
+            {
+                new_generation.push_back(schedules[i]);
+            }
+        }
+        schedules.clear();
+        schedules=new_generation;
 	}
 	void localSearch(int num_to_search)
 	{
@@ -538,16 +547,16 @@ public:
 			++i;
 		}
 	}
-	void sortParents(int num_of_parent)
+	void sortParents()
 	{
-		std::sort(schedules.begin(), schedules.begin() + num_of_parent, [](const Schedule & a, const Schedule & b) -> bool
+		std::sort(schedules.begin(), schedules.begin() + POPULATION_SIZE, [](const Schedule & a, const Schedule & b) -> bool
 		{
 			return a.getFitness() > b.getFitness();
 		});
 	}
-	void sortChildren(int num_of_parent)
+	void sortChildren()
 	{
-		std::sort(schedules.begin() + num_of_parent, schedules.end(), [](const Schedule & a, const Schedule & b) -> bool
+		std::sort(schedules.begin() + POPULATION_SIZE, schedules.end(), [](const Schedule & a, const Schedule & b) -> bool
 		{
 			return a.getFitness() > b.getFitness();
 		});
