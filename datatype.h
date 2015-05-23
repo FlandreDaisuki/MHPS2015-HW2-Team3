@@ -363,7 +363,6 @@ public:
 
 		for (int i = 0; i < elitism_num; ++i)
 		{
-		    std::cout<<parents[i].getFitness()<<"\n";
 			schedules.push_back(parents[i]);
 		}
 		return elitism_num;
