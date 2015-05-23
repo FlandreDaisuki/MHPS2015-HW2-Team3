@@ -28,7 +28,7 @@ const int POPULATION_SIZE = 20; //MA演算法中親代個數
 const int POPULATION_CHILDREN_SIZE = 20; //MA演算法中子代個數
 const int POPULATION_ITERATION = 1000; //GA演算法的代數
 const int LOCAL_SEARCH_FREQUENCY = 100; //每這麼多次做一次Local Search
-const int LOCAL_SEARCH_CHILDREN = 5; // how many children to do Local Search after envSelection()
+const int LOCAL_SEARCH_CHILDREN = 3; // how many children to do Local Search after envSelection()
 
 ///一個無編碼的排程，一個解序列
 class Schedule
@@ -385,7 +385,7 @@ public:
 	}
 	void crossover(std::vector <Schedule> &parents, std::vector <Schedule> &children)
 	{
-		int job, rand_start;
+		int job;
 		job = parents[0].getJobs();
 		std::vector <int> select_parents[2], already_add[2], create_children[2];
 		for (int Set = 0; Set < 2; ++Set)
@@ -398,11 +398,13 @@ public:
 			{
 				select_parents[Set] = scheduleToJob(parents[rand() % parents.size()]);
 			}
-			rand_start = (rand() % (job / 2));
+			int rand_start,rand_length;
+			rand_start = (rand() % job);
+			rand_length =(rand() %(job-rand_start));
 			for (int Set = 0; Set < 2; ++Set)
 			{
 			    already_add[Set].clear();
-				for (int j = rand_start; j < rand_start + job / 2; ++j) //隨機保留一段
+				for (int j = rand_start; j < rand_start + rand_length; ++j) //隨機保留一段
 				{
 					create_children[Set][j] = select_parents[Set][j];
 					already_add[Set].push_back(select_parents[Set][j]);
@@ -431,7 +433,7 @@ public:
 					create_children[Set][j] = search_job;
                     already_add[Set].push_back(search_job);
                 }
-                for (int j = rand_start + job / 2; j < job; ++j) //設定後半部
+                for (int j = rand_start + rand_length; j < job; ++j) //設定後半部
 				{
 					int search_job;
 
@@ -461,30 +463,48 @@ public:
 	void mutation(std::vector <Schedule> &children)
 	{
 		int job = children[0].getJobs();
+		int choose_case=1;
 
-		for (auto itr = children.begin(); itr != children.end(); ++itr)
-		{
-			if (rand() % 10 == 0) // means that 1/10 probability to mutation
-			{
-				int a = rand() % job;
-				int b = rand() % job;
+        if(choose_case==0)
+        {
+            for (auto itr = children.begin(); itr != children.end(); ++itr)
+            {
+                if (rand() % 10 == 0) // means that 1/10 probability to mutation
+                {
+                    int a = rand() % job;
+                    int b = rand() % job;
 
-				while (b == a)
-				{
-					b = rand() % job;
-				}
+                    while (b == a)
+                    {
+                        b = rand() % job;
+                    }
 
-				int c = rand() % job;
+                    int c = rand() % job;
 
-				while (c == a || c == b)
-				{
-					c = rand() % job;
-				}
+                    while (c == a || c == b)
+                    {
+                        c = rand() % job;
+                    }
 
-				itr->swapJobs(a, b);
-				itr->swapJobs(b, c);
-			}
-		}
+                    itr->swapJobs(a, b);
+                    itr->swapJobs(b, c);
+                }
+            }
+        }
+        else if(choose_case==1)
+        {
+            if(rand()%10==0)
+            {
+                for (auto itr = children.begin(); itr != children.end(); ++itr)
+                {
+                    std::vector <int> job_m;
+                    job_m=scheduleToJob(*itr);
+                    int rand_length=rand()%(job_m.size());
+                    std::reverse(job_m.begin(),job_m.begin()+rand_length);
+                    (*itr)=jobToSchedule(job_m);
+                }
+            }
+        }
 	}
 	void select_parent(std::vector <Schedule> &parent, int parent_produce_num)
 	{
@@ -539,20 +559,16 @@ public:
 	}
 	void localSearch(int num_to_search)
 	{
-		std::vector <int> temp_makespan(num_to_search);
+		std::vector <int> temp_makespan;
 		int i = 0;
-
-		for (auto itr = schedules.begin(); itr != schedules.begin() + num_to_search; ++itr)
+		for (auto itr = schedules.begin(); itr != schedules.end(); ++itr)
 		{
-			temp_makespan[i] = itr->getMakespan();
-			++i;
+			temp_makespan.push_back(itr->getMakespan());
 			itr->localSearch();
 		}
-
-		this->calculateFitness();
-		i = 0;
-
-		for (auto itr = schedules.begin(); itr != schedules.begin() + num_to_search; ++itr)
+        this->calculateFitness();
+        i=0;
+		for (auto itr = schedules.begin(); itr != schedules.end(); ++itr)
 		{
 			itr->setMakespan(temp_makespan[i]);
 			++i;
