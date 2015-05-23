@@ -28,6 +28,7 @@ int main(int argc, char const *argv[])
 		After calculateMakespan, all population Makespan is corrent but Fitness NOT.
 		Here Makespan should be EXACTLY correct.
 		*/
+		//std::cout<<"in";
 		parent.envSelection();
 		/*
 		After envSelection, Makespan keep correct but Fitness NOT.
@@ -56,7 +57,5 @@ int main(int argc, char const *argv[])
 		No matter what we do, Fitness SHOULD BE CORRECT HERE!!!!
 		*/
 	}
-    parent.printSolutionSimple(cout);
-    cout<<endl;
 	return 0;
 }
