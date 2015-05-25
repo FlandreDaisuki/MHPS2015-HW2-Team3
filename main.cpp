@@ -43,8 +43,6 @@ int main(int argc, char const *argv[])
 		/*
 		After sortPopulation, we can get sorted-by-fitness makespan-correct population, fitness correct as well.
 		*/
-		parent.printSolutionSimple(cout);
-        cout<<endl;
 		if (pitr % LOCAL_SEARCH_FREQUENCY == 0)
 		{
 			parent.localSearch(LOCAL_SEARCH_CHILDREN);
@@ -53,6 +51,9 @@ int main(int argc, char const *argv[])
 			Both makespan and fitness are correct but unordered.
 			*/
 		}
+
+		parent.printSolutionSimple(cout);
+        cout << endl;
 		/*
 		No matter what we do, Fitness SHOULD BE CORRECT HERE!!!!
 		*/
