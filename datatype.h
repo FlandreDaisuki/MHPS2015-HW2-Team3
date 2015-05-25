@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <cmath>
 #include <ctime>
@@ -22,10 +22,10 @@
 /*****************************/
 
 typedef std::vector< std::vector<int> > Matrix;
-const int LOCAL_SEARCH_ITERATION = 100000; // iterations of local search
+const int LOCAL_SEARCH_ITERATION = 10000; // iterations of local search
 const int POPULATION_SIZE = 50; //MA演算法中親代個數
 const int POPULATION_CHILDREN_SIZE = 20; //MA演算法中子代個數
-const int POPULATION_ITERATION = 1000; //GA演算法的代數
+const int POPULATION_ITERATION = 1500; //GA演算法的代數
 const int LOCAL_SEARCH_FREQUENCY = 50; //每這麼多次做一次Local Search
 const int LOCAL_SEARCH_CHILDREN = 5; // how many children to do Local Search after envSelection()
 
@@ -118,7 +118,7 @@ public:
 	}
 	void localSearch()
 	{
-		makespan = (this->simulated_annealing());
+		makespan = (this->ii());
 	}
 	void shuffle()
 	{
@@ -147,7 +147,7 @@ private:
 	int makespan;
 	Matrix matrix;
 
-	int simulated_annealing()
+	int sa() const
 	{
 		Schedule sa(*this);
 
@@ -199,8 +199,58 @@ private:
 
 		return sa.getMakespan();
 	}
-};
+	int ii() const
+	{
+		Schedule ii(*this);
+		Schedule best_t(*this);
 
+		ii.setMakespan(ii.calcMakespan());
+		best_t.setMakespan(ii.getMakespan());
+
+		const int reset_threshold = 50;
+		int reset_th = 0;
+
+
+		for (int iter = 0; iter < LOCAL_SEARCH_ITERATION; ++iter)
+		{
+			int xbefore = ii.getMakespan();
+
+			int job1 = rand() % jobs, job2 = rand() % jobs;
+
+			while (job1 == job2)
+			{
+				job2 = rand() % jobs;
+			}
+
+			ii.swapJobs(job1, job2);
+			int xafter = ii.calcMakespan();
+
+			if (xafter < xbefore)
+			{
+				//accept
+				ii.setMakespan(xafter);
+				reset_th = 0;
+				if (xafter < best_t.getMakespan())
+				{
+					best_t = ii;
+					best_t.setMakespan(ii.getMakespan());
+				}
+			}
+			else
+			{
+				ii.swapJobs(job1, job2);
+				reset_th += 1;
+			}
+
+			if (reset_th > reset_threshold)
+			{
+				ii.shuffle();
+			}
+		}
+
+		return best_t.getMakespan();
+	}
+};
 class Population
 {
 public:
@@ -312,41 +362,49 @@ public:
 	{
 		std::vector <Schedule> parents;
 		std::vector <Schedule> children;
-		int parent_produce_num = 10;
 
-		select_parent(parents, parent_produce_num);
-		elitism(parents);
-		crossover(parents, children);
+		//elitism();
+		crossover(children);
 		mutation_shift(children);
+
 		for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
 		{
 			schedules.push_back(children[i]);
 		}
 	}
-	void elitism(std::vector <Schedule> &parents)
+	void elitism()
 	{
-		std::sort(parents.begin(), parents.end(), [](const Schedule & a, const Schedule & b) -> bool
-		{
-			return a.getFitness() > b.getFitness();
-		});
+		this->sortParents();
+
 		int elitism_parameter;
 		this->elitism_num = 0;
 		elitism_parameter = rand() % 100;
 		if(elitism_parameter < 20) //20% 保留第一個
 		{
-			schedules.push_back(parents[0]);
+			schedules.push_back(schedules[0]);
 			this->elitism_num += 1;
 		}
 		if(elitism_parameter < 10) //10% 保留第二個
 		{
-			schedules.push_back(parents[1]);
+			schedules.push_back(schedules[1]);
 			this->elitism_num += 1;
 		}
 	}
-	void crossover(std::vector <Schedule> &parents, std::vector <Schedule> &children)
+	const Schedule &twoTournament(const Schedule &P1,const Schedule &P2) const
+	{
+		if(rand() % 100 > 70) //30%
+		{
+			return (P1.getFitness() < P2.getFitness()) ? P1 : P2;
+		}
+		else //70%
+		{
+			return (P1.getFitness() > P2.getFitness()) ? P1 : P2;
+		}
+	}
+	void crossover(std::vector <Schedule> &children)
 	{
 		int job;
-		job = parents[0].getJobs();
+		job = schedules[0].getJobs();
 		std::vector <int> select_parents[2], create_children[2];
 		for (int Set = 0; Set < 2; ++Set)
 		{
@@ -358,7 +416,7 @@ public:
 		{
 			for (int Set = 0; Set < 2; ++Set)  //選父母設定
 			{
-				select_parents[Set] = scheduleToJob(parents[rand() % parents.size()]);
+				select_parents[Set] = scheduleToJob(twoTournament(schedules[rand() % POPULATION_SIZE], schedules[rand() % POPULATION_SIZE]));
 				create_children[Set] = select_parents[Set];
 				rand_select[Set] = create_children[Set];
 			}
@@ -422,7 +480,7 @@ public:
 
 		for (auto itr = children.begin(); itr != children.end(); ++itr)
 		{
-			if (rand() % 10 <= 1) // means that 20% probability to mutation
+			if (rand() % 10 <= 4) // means that 20% probability to mutation
 			{
 				int a = rand() % job;
 				int b = rand() % job;
@@ -486,21 +544,20 @@ public:
 		schedules.clear();
 		schedules = new_generation;
 	}
-	void localSearch(int num_to_search)
+	void localSearch()
 	{
-		std::vector <int> temp_makespan(num_to_search);
-		int i = 0;
-		for (auto itr=schedules.end()-1; itr != schedules.end() - 1 - num_to_search; --itr)
+		std::vector <int> temp_makespan;
+		for (auto itr = schedules.rbegin(); itr != schedules.rbegin() + LOCAL_SEARCH_CHILDREN; ++itr)
 		{
-			temp_makespan[i] = itr->getMakespan();
-			++i;
+			temp_makespan.push_back(itr->getMakespan());
 			itr->localSearch();
 		}
-
+		
 		this->calculateFitness();
-		i = 0;
+		
+		int i = 0;
 
-		for (auto itr = schedules.end()-1; itr != schedules.end() - 1 - num_to_search; --itr)
+		for (auto itr = schedules.rbegin(); itr != schedules.rbegin() + LOCAL_SEARCH_CHILDREN; ++itr)
 		{
 			itr->setMakespan(temp_makespan[i]);
 			++i;
@@ -574,7 +631,6 @@ public:
 	void printSolutionSimple(std::ostream &out = std::cout) const
 	{
 		int sum_of_makespan = 0;
-
 		for (auto sitr = schedules.begin(); sitr != schedules.end(); ++sitr)
 		{
 			std::vector<int> jobseq = scheduleToJob(*sitr);

@@ -39,13 +39,12 @@ int main(int argc, char const *argv[])
 		Here Fitness should be EXACTLY correct.
 		*/
 		parent.sortPopulation();
-
 		/*
 		After sortPopulation, we can get sorted-by-fitness makespan-correct population, fitness correct as well.
 		*/
-		if (pitr % LOCAL_SEARCH_FREQUENCY == 0)
+		if (pitr % LOCAL_SEARCH_FREQUENCY == LOCAL_SEARCH_FREQUENCY - 1)
 		{
-			parent.localSearch(LOCAL_SEARCH_CHILDREN);
+			parent.localSearch();
 			/*
 			After localSearch, Fitness re-calculated.
 			Both makespan and fitness are correct but unordered.
