@@ -385,77 +385,119 @@ public:
 	}
 	void crossover(std::vector <Schedule> &parents, std::vector <Schedule> &children)
 	{
-		int job, rand_start;
-		job = parents[0].getJobs();
-		std::vector <int> select_parents[2], already_add[2], create_children[2];
-		for (int Set = 0; Set < 2; ++Set)
-		{
-			create_children[Set].resize(job);
-		}
-		for (int i = 0; i < POPULATION_SIZE; i += 2) //一次產生2children
-		{
-			for (int Set = 0; Set < 2; ++Set)  //選父母設定
-			{
-				select_parents[Set] = scheduleToJob(parents[rand() % parents.size()]);
-			}
-			rand_start = (rand() % (job / 2));
-			for (int Set = 0; Set < 2; ++Set)
-			{
-			    already_add[Set].clear();
-				for (int j = rand_start; j < rand_start + job / 2; ++j) //隨機保留一段
-				{
-					create_children[Set][j] = select_parents[Set][j];
-					already_add[Set].push_back(select_parents[Set][j]);
-				}
-			}
-			for (int Set = 0; Set < 2; ++Set)
-			{
-				int index = 0;
-
-				for (int j = 0; j < rand_start; ++j) //設定前半部
-				{
-					int search_job;
-
-					while (index < job)
-					{
-						search_job = select_parents[(Set + 1) % 2][index]; //從對面挑一個出來看有沒有重複
-
-						if (find(already_add[Set].begin(), already_add[Set].end(), search_job) == already_add[Set].end()) //還沒加入的工作
-						{
-							break;
-						}
-
-						index++;
-
-					}
-					create_children[Set][j] = search_job;
-                    already_add[Set].push_back(search_job);
+	    int job,choose_case=1;
+	    job = parents[0].getJobs();
+	    std::vector <int> select_parents[2],create_children[2];
+	    for (int Set = 0; Set < 2; ++Set)
+        {
+           create_children[Set].resize(job);
+        }
+	    if(choose_case==0)
+        {
+            int rand_start;
+            std::vector <int> already_add[2];
+            for (int i = 0; i < POPULATION_SIZE; i += 2) //一次產生2children
+            {
+                for (int Set = 0; Set < 2; ++Set)  //選父母設定
+                {
+                    select_parents[Set] = scheduleToJob(parents[rand() % parents.size()]);
                 }
-                for (int j = rand_start + job / 2; j < job; ++j) //設定後半部
-				{
-					int search_job;
+                rand_start = (rand() % (job / 2));
+                for (int Set = 0; Set < 2; ++Set)
+                {
+                    already_add[Set].clear();
+                    for (int j = rand_start; j < rand_start + job / 2; ++j) //隨機保留一段
+                    {
+                        create_children[Set][j] = select_parents[Set][j];
+                        already_add[Set].push_back(select_parents[Set][j]);
+                    }
+                }
+                for (int Set = 0; Set < 2; ++Set)
+                {
+                    int index = 0;
 
-					while (index < job)
-					{
-						search_job = select_parents[(Set + 1) % 2][index];
+                    for (int j = 0; j < rand_start; ++j) //設定前半部
+                    {
+                        int search_job;
 
-						if (find(already_add[Set].begin(), already_add[Set].end(), search_job) == already_add[Set].end())
-						{
-							break;
-						}
+                        while (index < job)
+                        {
+                            search_job = select_parents[(Set + 1) % 2][index]; //從對面挑一個出來看有沒有重複
 
-						index++;
-					}
+                            if (find(already_add[Set].begin(), already_add[Set].end(), search_job) == already_add[Set].end()) //還沒加入的工作
+                            {
+                                break;
+                            }
 
-					create_children[Set][j] = search_job;
-					already_add[Set].push_back(search_job);
-				}
-			}
+                            index++;
 
-			for (int Set = 0; Set < 2; ++Set)
-			{
-				children.push_back(jobToSchedule(create_children[Set]));
-			}
+                        }
+                        create_children[Set][j] = search_job;
+                        already_add[Set].push_back(search_job);
+                    }
+                    for (int j = rand_start + job / 2; j < job; ++j) //設定後半部
+                    {
+                        int search_job;
+
+                        while (index < job)
+                        {
+                            search_job = select_parents[(Set + 1) % 2][index];
+
+                            if (find(already_add[Set].begin(), already_add[Set].end(), search_job) == already_add[Set].end())
+                            {
+                                break;
+                            }
+
+                            index++;
+                        }
+
+                        create_children[Set][j] = search_job;
+                        already_add[Set].push_back(search_job);
+                    }
+                }
+                for (int Set = 0; Set < 2; ++Set)
+                {
+                    children.push_back(jobToSchedule(create_children[Set]));
+                }
+            }
+        }
+        else if(choose_case==1)
+        {
+            std::vector <int> rand_select[2];
+            int rand_index;
+            for (int i = 0; i < POPULATION_SIZE; i += 2) //一次產生2children
+            {
+               for (int Set = 0; Set < 2; ++Set)  //選父母設定
+               {
+                     select_parents[Set] = scheduleToJob(parents[rand() % parents.size()]);
+                     create_children[Set] = select_parents[Set];
+                     rand_select[Set]= create_children[Set];
+               }
+               for(int Set=0;Set<2;++Set)
+               {
+                  while(rand_select[Set].size()>job/4)    //建立一個隨機子序列
+                  {
+                      rand_select[Set].erase(rand_select[Set].begin()+(rand()%rand_select[Set].size()));
+                  }
+                }
+                for(int Set=0;Set<2;++Set)
+                {
+                    int k=0;                //rand_start 加到第幾個
+                    for(int j=0;j<job;++j)
+                    {
+                        if(find(rand_select[(Set+1)%2].begin(),rand_select[(Set+1)%2].end(),create_children[Set][j])==rand_select[(Set+1)%2].end())
+                        {
+                            continue;
+                        }
+                        create_children[Set][j]=rand_select[(Set+1)%2][k];
+                        ++k;
+                    }
+                }
+                for (int Set = 0; Set < 2; ++Set)
+                {
+                    children.push_back(jobToSchedule(create_children[Set]));
+                }
+            }
         }
 	}
 	void mutation(std::vector <Schedule> &children)
