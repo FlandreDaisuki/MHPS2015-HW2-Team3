@@ -317,7 +317,7 @@ public:
 		select_parent(parents, parent_produce_num);
 		elitism(parents);
 		crossover(parents, children);
-		mutation(children);
+		mutation_shift(children);
 		for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
 		{
 			schedules.push_back(children[i]);
@@ -416,6 +416,25 @@ public:
 			}
 		}
 	}
+	void mutation_shift(std::vector <Schedule> &children)
+	{
+		int job = children[0].getJobs();
+
+		for (auto itr = children.begin(); itr != children.end(); ++itr)
+		{
+			if (rand() % 10 <= 1) // means that 20% probability to mutation
+			{
+				int a = rand() % job;
+				int b = rand() % job;
+
+				while(b < job-1 && a > 0) {
+					itr->swapJobs(b, b + 1);
+					b++;
+					a--;
+				}
+			}
+		}
+	}
 	void select_parent(std::vector <Schedule> &parent, int parent_produce_num)
 	{
 		int group_start_index[POPULATION_SIZE], total_fitness, index;
@@ -446,15 +465,15 @@ public:
 		this->sortChildren();
 		this->sortParents();
 		this->env2_4();
-	}pulation
-		std::vector <Schedule> new_generation;
-		for(int i=0;i<elitism_num;++i)
-		{
-			new_generation.push_back(schedules[i]);
+	}
 	void env2_4()
 	{
 		//The method is sort both parent and children
-		//Then pick who has best makespan as new po
+		//Then pick who has best makespan as new population
+		std::vector <Schedule> new_generation;
+		for(int i = 0; i < elitism_num; ++i)
+		{
+			new_generation.push_back(schedules[i]);
 		}
 		for(int i = elitism_num; i < elitism_num + POPULATION_SIZE / 5; ++i)    //parent的前20%
 		{
@@ -507,6 +526,10 @@ public:
 		{
 			return a.getFitness() > b.getFitness();
 		});
+	}
+	int get_elitism_num()
+	{
+		return elitism_num;
 	}
 	std::vector<int> scheduleToJob(const Schedule &s) const
 	{
@@ -565,6 +588,7 @@ public:
 					out << ",";
 				}
 			}
+
 			out << " :" << sitr->getMakespan() << std::endl;
 		}
 	}
