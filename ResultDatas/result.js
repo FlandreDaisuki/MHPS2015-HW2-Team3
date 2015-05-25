@@ -19,7 +19,6 @@ process.argv.forEach(function(val){
 });
 
 var filename = process.argv[2].split('.')[0];
-var populationSize = 20;
 
 var jsonArr, fjsonArr, statArr;
 
