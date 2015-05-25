@@ -7,10 +7,12 @@ int main(int argc, char const *argv[])
 {
 	srand(time(0));
 	Population parent;
-	//parent.readInitialPopulation("testdata.txt");
-	parent.readPopulationBase("one_testdata.txt");
+	parent.readPopulationBase(argv[1]);
+
 	parent.InitialPopulation();
+
 	parent.calculateFitness();
+	
     parent.printSolutionSimple(cout);
     cout<<endl;
 	for (int pitr = 0; pitr < POPULATION_ITERATION; ++pitr)
