@@ -19,15 +19,15 @@
 /* Member function: 駱駝式   */
 /* Member variable: 小寫底線 */
 /*                           */
+
 /*****************************/
 
 typedef std::vector< std::vector<int> > Matrix;
-
-const int LOCAL_SEARCH_ITERATION = 1000; // iterations of local search
-const int POPULATION_SIZE = 20; //MA演算法中親代個數
+const int LOCAL_SEARCH_ITERATION = 100000; // iterations of local search
+const int POPULATION_SIZE = 50; //MA演算法中親代個數
 const int POPULATION_CHILDREN_SIZE = 20; //MA演算法中子代個數
 const int POPULATION_ITERATION = 1000; //GA演算法的代數
-const int LOCAL_SEARCH_FREQUENCY = 100; //每這麼多次做一次Local Search
+const int LOCAL_SEARCH_FREQUENCY = 50; //每這麼多次做一次Local Search
 const int LOCAL_SEARCH_CHILDREN = 5; // how many children to do Local Search after envSelection()
 
 ///一個無編碼的排程，一個解序列
@@ -70,11 +70,11 @@ public:
 		assert(makespan >= 0);
 		return makespan;
 	}
-	void setFitness(int f)
+	void setFitness(double f)
 	{
 		fitness = f;
 	}
-	int getFitness() const
+	double getFitness() const
 	{
 		return fitness;
 	}
@@ -144,7 +144,7 @@ public:
 	}
 private:
 	const int jobs, machines;
-	int fitness; // this variable is for environment selection(Baldwinian).
+	double fitness; // this variable is for environment selection(Baldwinian).
 	int makespan;
 	Matrix matrix;
 
@@ -154,13 +154,13 @@ private:
 
 		sa.setMakespan(sa.calcMakespan());
 
-		const double INIT_T = 10000.0;
+		const double INIT_T = 100000.0;
 		const double TERM_T = 0.005;
-		const double COOLDOWN = 0.99; //cool down every iterations
+		const double COOLDOWN = 0.9999; //cool down every iterations
 
 		double temperature = INIT_T;
 
-		for (int iter = 0; iter < LOCAL_SEARCH_ITERATION   && temperature > TERM_T ; ++iter)
+		for (int iter = 0; iter < LOCAL_SEARCH_ITERATION /* && temperature > TERM_T */; ++iter)
 		{
 			int xbefore = sa.getMakespan();
 
@@ -181,8 +181,7 @@ private:
 			}
 			else
 			{
-				double r = (std::rand() % 10000) / 10000.0;
-				//printf("E:%f r:%f\n", std::exp((xafter - xbefore) / temperature) , r);
+				double r = ((std::rand() << 2) % 100000) / 100000.0;
 
 				if (std::exp((xbefore - xafter) / temperature) > r)
 				{
@@ -306,7 +305,7 @@ public:
 		Schedule s(schedules[0]);
 		schedules[0].setMakespan(schedules[0].calcMakespan());
 
-		for (int i = 0; i < POPULATION_SIZE * 3; ++i)
+		for (int i = 0; i < POPULATION_SIZE * 5; ++i)
 		{
 			s.shuffle();
 			s.setMakespan(s.calcMakespan());
@@ -325,18 +324,22 @@ public:
 	}
 	void calculateFitness()
 	{
-		int worst_case = 0;
+		double worst_case = 0.0;
 
 		for (auto pitr = schedules.begin(); pitr != schedules.end(); ++pitr)
 		{
-			worst_case = std::max(worst_case, pitr->getMakespan());
+			worst_case = std::max(worst_case, (double)pitr->getMakespan());
 		}
 
 		for (auto pitr = schedules.begin(); pitr != schedules.end(); ++pitr)
 		{
-			pitr->setFitness(worst_case - pitr->getMakespan());       //makespan越小 fitness 越大
+			double new_fitness = worst_case - (double)pitr->getMakespan();
+			if(new_fitness <= 0.0)
+			{
+				new_fitness = (rand() % 100) / 100;
+			}
+			pitr->setFitness(new_fitness); //makespan越小 fitness 越大
 		}
-
 	}
 	void genChildren()
 	{
@@ -345,23 +348,13 @@ public:
 		int parent_produce_num = 10;
 		//select betters {輪盤法,window,...} depend on fitness
 		select_parent(parents, parent_produce_num);
-
-		/*for(int i=0;i<parents.size();++i)
-        {
-            parents[i].print();
-        }*/
-        elitism(parents);
+		elitism(parents);
 		crossover(parents, children);
-		/*for(int i=0;i<children.size();++i)
-        {
-            children[i].print();
-        }*/
 		mutation(children);
 		for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
 		{
 			schedules.push_back(children[i]);
 		}
-
 	}
 	void elitism(std::vector <Schedule> &parents)
 	{
@@ -370,135 +363,63 @@ public:
 			return a.getFitness() > b.getFitness();
 		});
 		int elitism_parameter;
-		this->elitism_num=0;
-		elitism_parameter=rand()%100;
-		if(elitism_parameter<20)       //20% 保留第一個
-        {
-            schedules.push_back(parents[0]);
-            this->elitism_num+=1;
-        }
-        if(elitism_parameter<10)       //10% 保留第二個
-        {
-            schedules.push_back(parents[1]);
-            this->elitism_num+=1;
-        }
+		this->elitism_num = 0;
+		elitism_parameter = rand() % 100;
+		if(elitism_parameter < 20) //20% 保留第一個
+		{
+			schedules.push_back(parents[0]);
+			this->elitism_num += 1;
+		}
+		if(elitism_parameter < 10) //10% 保留第二個
+		{
+			schedules.push_back(parents[1]);
+			this->elitism_num += 1;
+		}
 	}
 	void crossover(std::vector <Schedule> &parents, std::vector <Schedule> &children)
 	{
-	    int job,choose_case=1;
-	    job = parents[0].getJobs();
-	    std::vector <int> select_parents[2],create_children[2];
-	    for (int Set = 0; Set < 2; ++Set)
-        {
-           create_children[Set].resize(job);
-        }
-	    if(choose_case==0)
-        {
-            int rand_start;
-            std::vector <int> already_add[2];
-            for (int i = 0; i < POPULATION_SIZE; i += 2) //一次產生2children
-            {
-                for (int Set = 0; Set < 2; ++Set)  //選父母設定
-                {
-                    select_parents[Set] = scheduleToJob(parents[rand() % parents.size()]);
-                }
-                rand_start = (rand() % (job / 2));
-                for (int Set = 0; Set < 2; ++Set)
-                {
-                    already_add[Set].clear();
-                    for (int j = rand_start; j < rand_start + job / 2; ++j) //隨機保留一段
-                    {
-                        create_children[Set][j] = select_parents[Set][j];
-                        already_add[Set].push_back(select_parents[Set][j]);
-                    }
-                }
-                for (int Set = 0; Set < 2; ++Set)
-                {
-                    int index = 0;
+		int job;
+		job = parents[0].getJobs();
+		std::vector <int> select_parents[2], create_children[2];
+		for (int Set = 0; Set < 2; ++Set)
+		{
+			create_children[Set].resize(job);
+		}
+		std::vector <int> rand_select[2];
 
-                    for (int j = 0; j < rand_start; ++j) //設定前半部
-                    {
-                        int search_job;
-
-                        while (index < job)
-                        {
-                            search_job = select_parents[(Set + 1) % 2][index]; //從對面挑一個出來看有沒有重複
-
-                            if (find(already_add[Set].begin(), already_add[Set].end(), search_job) == already_add[Set].end()) //還沒加入的工作
-                            {
-                                break;
-                            }
-
-                            index++;
-
-                        }
-                        create_children[Set][j] = search_job;
-                        already_add[Set].push_back(search_job);
-                    }
-                    for (int j = rand_start + job / 2; j < job; ++j) //設定後半部
-                    {
-                        int search_job;
-
-                        while (index < job)
-                        {
-                            search_job = select_parents[(Set + 1) % 2][index];
-
-                            if (find(already_add[Set].begin(), already_add[Set].end(), search_job) == already_add[Set].end())
-                            {
-                                break;
-                            }
-
-                            index++;
-                        }
-
-                        create_children[Set][j] = search_job;
-                        already_add[Set].push_back(search_job);
-                    }
-                }
-                for (int Set = 0; Set < 2; ++Set)
-                {
-                    children.push_back(jobToSchedule(create_children[Set]));
-                }
-            }
-        }
-        else if(choose_case==1)
-        {
-            std::vector <int> rand_select[2];
-            int rand_index;
-            for (int i = 0; i < POPULATION_SIZE; i += 2) //一次產生2children
-            {
-               for (int Set = 0; Set < 2; ++Set)  //選父母設定
-               {
-                     select_parents[Set] = scheduleToJob(parents[rand() % parents.size()]);
-                     create_children[Set] = select_parents[Set];
-                     rand_select[Set]= create_children[Set];
-               }
-               for(int Set=0;Set<2;++Set)
-               {
-                  while(rand_select[Set].size()>job/4)    //建立一個隨機子序列
-                  {
-                      rand_select[Set].erase(rand_select[Set].begin()+(rand()%rand_select[Set].size()));
-                  }
-                }
-                for(int Set=0;Set<2;++Set)
-                {
-                    int k=0;                //rand_start 加到第幾個
-                    for(int j=0;j<job;++j)
-                    {
-                        if(find(rand_select[(Set+1)%2].begin(),rand_select[(Set+1)%2].end(),create_children[Set][j])==rand_select[(Set+1)%2].end())
-                        {
-                            continue;
-                        }
-                        create_children[Set][j]=rand_select[(Set+1)%2][k];
-                        ++k;
-                    }
-                }
-                for (int Set = 0; Set < 2; ++Set)
-                {
-                    children.push_back(jobToSchedule(create_children[Set]));
-                }
-            }
-        }
+		for (int i = 0; i < POPULATION_SIZE; i += 2) //一次產生2children
+		{
+			for (int Set = 0; Set < 2; ++Set)  //選父母設定
+			{
+				select_parents[Set] = scheduleToJob(parents[rand() % parents.size()]);
+				create_children[Set] = select_parents[Set];
+				rand_select[Set] = create_children[Set];
+			}
+			for(int Set = 0; Set < 2; ++Set)
+			{
+				while(rand_select[Set].size() > job / 4) //建立一個隨機子序列
+				{
+					rand_select[Set].erase(rand_select[Set].begin() + (rand() % rand_select[Set].size()));
+				}
+			}
+			for(int Set = 0; Set < 2; ++Set)
+			{
+				int k = 0; //rand_start 加到第幾個
+				for(int j = 0; j < job; ++j)
+				{
+					if(find(rand_select[(Set + 1) % 2].begin(), rand_select[(Set + 1) % 2].end(), create_children[Set][j]) == rand_select[(Set + 1) % 2].end())
+					{
+						continue;
+					}
+					create_children[Set][j] = rand_select[(Set + 1) % 2][k];
+					++k;
+				}
+			}
+			for (int Set = 0; Set < 2; ++Set)
+			{
+				children.push_back(jobToSchedule(create_children[Set]));
+			}
+		}
 	}
 	void mutation(std::vector <Schedule> &children)
 	{
@@ -506,7 +427,7 @@ public:
 
 		for (auto itr = children.begin(); itr != children.end(); ++itr)
 		{
-			if (rand() % 10 == 0) // means that 1/10 probability to mutation
+			if (rand() % 10 <= 4) // means that 1/10 probability to mutation
 			{
 				int a = rand() % job;
 				int b = rand() % job;
@@ -555,8 +476,8 @@ public:
 	void envSelection()
 	{
 		// 已知前半是parent 後半是children
-        this->sortChildren();
-        this->sortParents();
+		this->sortChildren();
+		this->sortParents();
 		this->env2_4();
 	}
 	void env2_4()
@@ -565,26 +486,25 @@ public:
 		//Then pick who has best makespan as new population
 		std::vector <Schedule> new_generation;
 		for(int i=0;i<elitism_num;++i)
-        {
-            new_generation.push_back(schedules[i]);
-        }
-  		for(int i=elitism_num;i<elitism_num+POPULATION_SIZE/5;++i)    //parent的前20%
-        {
-            new_generation.push_back(schedules[i]);
-        }
-        for(int i=POPULATION_SIZE+elitism_num;i<POPULATION_SIZE+elitism_num+4*POPULATION_SIZE/5;++i)    //children的前80%
-        {
-            new_generation.push_back(schedules[i]);
-        }
-        schedules.clear();
-        schedules=new_generation;
+		{
+			new_generation.push_back(schedules[i]);
+		}
+		for(int i=elitism_num;i<elitism_num+POPULATION_SIZE/5;++i)    //parent的前20%
+		{
+			new_generation.push_back(schedules[i]);
+		}
+		for(int i=POPULATION_SIZE+elitism_num;i<POPULATION_SIZE+elitism_num+4*POPULATION_SIZE/5;++i)    //children的前80%
+		{
+			new_generation.push_back(schedules[i]);
+		}
+		schedules.clear();
+		schedules=new_generation;
 	}
 	void localSearch(int num_to_search)
 	{
 		std::vector <int> temp_makespan(num_to_search);
 		int i = 0;
-
-		for (auto itr = schedules.begin(); itr != schedules.begin() + num_to_search; ++itr)
+		for (auto itr=schedules.end()-1; itr != schedules.end() - 1 - num_to_search; --itr)
 		{
 			temp_makespan[i] = itr->getMakespan();
 			++i;
@@ -594,7 +514,7 @@ public:
 		this->calculateFitness();
 		i = 0;
 
-		for (auto itr = schedules.begin(); itr != schedules.begin() + num_to_search; ++itr)
+		for (auto itr = schedules.end()-1; itr != schedules.end() - 1 - num_to_search; --itr)
 		{
 			itr->setMakespan(temp_makespan[i]);
 			++i;
@@ -623,7 +543,7 @@ public:
 	}
 	int get_elitism_num()
 	{
-        return elitism_num;
+		return elitism_num;
 	}
 	std::vector<int> scheduleToJob(const Schedule &s) const
 	{
@@ -689,6 +609,6 @@ public:
 private:
 	std::vector<Schedule> schedules;
 	Matrix job_map;
-	int elitism_num;
+	int elitism_num = 0;
 };
 
