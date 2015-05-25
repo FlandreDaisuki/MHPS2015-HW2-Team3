@@ -19,7 +19,6 @@
 /* Member function: 駱駝式   */
 /* Member variable: 小寫底線 */
 /*                           */
-
 /*****************************/
 
 typedef std::vector< std::vector<int> > Matrix;
@@ -181,7 +180,7 @@ private:
 			}
 			else
 			{
-				double r = ((std::rand() << 2) % 100000) / 100000.0;
+				double r = ((std::rand() << 2 + std::rand()) % 100000) / 100000.0;
 
 				if (std::exp((xbefore - xafter) / temperature) > r)
 				{
@@ -264,38 +263,6 @@ public:
 		schedules.push_back(s);
 		job_map = s.getMatrix();
 	}
-	void readInitialPopulation(const char* filename)
-	{
-		//this function is for testing data
-		std::fstream fin;
-		fin.open(filename);
-
-		if (!fin.is_open())
-		{
-			std::cout << "Fail to open file." << std::endl;
-			return;
-		}
-
-		int jobs_n, machines_n, schedules_n;
-		Schedule s(jobs_n, machines_n);
-		fin >> jobs_n >> machines_n >> schedules_n;
-		for (int sn = 0; sn < schedules_n; ++sn)
-		{
-			Schedule s(jobs_n, machines_n);
-
-			for (int mn = 0; mn < machines_n; ++mn)
-			{
-				for (int jn = 0; jn < jobs_n; ++jn)
-				{
-					fin >> s.getMatrix()[jn][mn];
-				}
-			}
-
-			schedules.push_back(s);
-		}
-
-		job_map = schedules[0].getMatrix();
-	}
 	void InitialPopulation()
 	{
 		//generate a set of better population
@@ -346,7 +313,7 @@ public:
 		std::vector <Schedule> parents;
 		std::vector <Schedule> children;
 		int parent_produce_num = 10;
-		//select betters {輪盤法,window,...} depend on fitness
+
 		select_parent(parents, parent_produce_num);
 		elitism(parents);
 		crossover(parents, children);
@@ -358,7 +325,7 @@ public:
 	}
 	void elitism(std::vector <Schedule> &parents)
 	{
-		std::sort(parents.begin(), parents.end() , [](const Schedule & a, const Schedule & b) -> bool
+		std::sort(parents.begin(), parents.end(), [](const Schedule & a, const Schedule & b) -> bool
 		{
 			return a.getFitness() > b.getFitness();
 		});
@@ -427,7 +394,7 @@ public:
 
 		for (auto itr = children.begin(); itr != children.end(); ++itr)
 		{
-			if (rand() % 10 <= 4) // means that 1/10 probability to mutation
+			if (rand() % 10 <= 1) // means that 20% probability to mutation
 			{
 				int a = rand() % job;
 				int b = rand() % job;
@@ -479,26 +446,26 @@ public:
 		this->sortChildren();
 		this->sortParents();
 		this->env2_4();
-	}
-	void env2_4()
-	{
-		//The method is sort both parent and children
-		//Then pick who has best makespan as new population
+	}pulation
 		std::vector <Schedule> new_generation;
 		for(int i=0;i<elitism_num;++i)
 		{
 			new_generation.push_back(schedules[i]);
+	void env2_4()
+	{
+		//The method is sort both parent and children
+		//Then pick who has best makespan as new po
 		}
-		for(int i=elitism_num;i<elitism_num+POPULATION_SIZE/5;++i)    //parent的前20%
+		for(int i = elitism_num; i < elitism_num + POPULATION_SIZE / 5; ++i)    //parent的前20%
 		{
 			new_generation.push_back(schedules[i]);
 		}
-		for(int i=POPULATION_SIZE+elitism_num;i<POPULATION_SIZE+elitism_num+4*POPULATION_SIZE/5;++i)    //children的前80%
+		for(int i = POPULATION_SIZE + elitism_num; i < POPULATION_SIZE + elitism_num + 4 * POPULATION_SIZE / 5; ++i)    //children的前80%
 		{
 			new_generation.push_back(schedules[i]);
 		}
 		schedules.clear();
-		schedules=new_generation;
+		schedules = new_generation;
 	}
 	void localSearch(int num_to_search)
 	{
@@ -540,10 +507,6 @@ public:
 		{
 			return a.getFitness() > b.getFitness();
 		});
-	}
-	int get_elitism_num()
-	{
-		return elitism_num;
 	}
 	std::vector<int> scheduleToJob(const Schedule &s) const
 	{
@@ -602,7 +565,6 @@ public:
 					out << ",";
 				}
 			}
-
 			out << " :" << sitr->getMakespan() << std::endl;
 		}
 	}
