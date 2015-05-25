@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <cmath>
 #include <ctime>
@@ -201,7 +201,6 @@ private:
 		return sa.getMakespan();
 	}
 };
-
 class Population
 {
 public:
@@ -343,43 +342,48 @@ public:
 	}
 	void genChildren()
 	{
-		std::vector <Schedule> parents;
 		std::vector <Schedule> children;
-		int parent_produce_num = 10;
-		//select betters {輪盤法,window,...} depend on fitness
-		select_parent(parents, parent_produce_num);
-		elitism(parents);
-		crossover(parents, children);
+		elitism();
+		crossover(children);
 		mutation(children);
 		for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
 		{
 			schedules.push_back(children[i]);
 		}
 	}
-	void elitism(std::vector <Schedule> &parents)
+	void elitism()
 	{
-		std::sort(parents.begin(), parents.end() , [](const Schedule & a, const Schedule & b) -> bool
-		{
-			return a.getFitness() > b.getFitness();
-		});
+		this->sortParents();
 		int elitism_parameter;
 		this->elitism_num = 0;
 		elitism_parameter = rand() % 100;
 		if(elitism_parameter < 20) //20% 保留第一個
 		{
-			schedules.push_back(parents[0]);
+			schedules.push_back(schedules[0]);
 			this->elitism_num += 1;
 		}
 		if(elitism_parameter < 10) //10% 保留第二個
 		{
-			schedules.push_back(parents[1]);
+			schedules.push_back(schedules[1]);
 			this->elitism_num += 1;
 		}
 	}
-	void crossover(std::vector <Schedule> &parents, std::vector <Schedule> &children)
+	Schedule two_tournament(const Schedule &P1,const Schedule &P2)
+	{
+	    if(rand() % 100 > 70)   //30%
+        {
+            return (P1.getFitness() < P2.getFitness())?P1:P2;
+        }
+        else        //90%
+        {
+            return (P1.getFitness() > P2.getFitness())?P1:P2;
+        }
+	}
+	void crossover(std::vector <Schedule> &children)
 	{
 		int job;
-		job = parents[0].getJobs();
+		Schedule s(20,5);
+		job=schedules[0].getJobs();
 		std::vector <int> select_parents[2], create_children[2];
 		for (int Set = 0; Set < 2; ++Set)
 		{
@@ -391,7 +395,7 @@ public:
 		{
 			for (int Set = 0; Set < 2; ++Set)  //選父母設定
 			{
-				select_parents[Set] = scheduleToJob(parents[rand() % parents.size()]);
+				select_parents[Set]=scheduleToJob(two_tournament(schedules[rand()%job],schedules[rand()%job]));
 				create_children[Set] = select_parents[Set];
 				rand_select[Set] = create_children[Set];
 			}
@@ -447,30 +451,6 @@ public:
 				itr->swapJobs(a, b);
 				itr->swapJobs(b, c);
 			}
-		}
-	}
-	void select_parent(std::vector <Schedule> &parent, int parent_produce_num)
-	{
-		int group_start_index[POPULATION_SIZE], total_fitness, index;
-		double rand_num;
-		group_start_index[0] = 0;
-		total_fitness = schedules[0].getFitness();
-
-		for (int i = 1; i < POPULATION_SIZE; ++i)
-		{
-			group_start_index[i] = group_start_index[i - 1] + schedules[i - 1].getFitness();
-			total_fitness += schedules[i].getFitness();
-		}
-
-		rand_num = (double)total_fitness * 0.5 / parent_produce_num;
-		index = 0;
-
-		for (int i = 0; i < parent_produce_num; ++i)
-		{
-			for (; index < POPULATION_SIZE && (double)group_start_index[index] <= rand_num; ++index);
-
-			parent.push_back(schedules[index - 1]);
-			rand_num += (double)total_fitness / parent_produce_num;
 		}
 	}
 	void envSelection()
@@ -588,7 +568,6 @@ public:
 	void printSolutionSimple(std::ostream &out = std::cout) const
 	{
 		int sum_of_makespan = 0;
-
 		for (auto sitr = schedules.begin(); sitr != schedules.end(); ++sitr)
 		{
 			std::vector<int> jobseq = scheduleToJob(*sitr);
