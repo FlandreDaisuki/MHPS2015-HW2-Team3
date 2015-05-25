@@ -363,7 +363,7 @@ public:
 		std::vector <Schedule> parents;
 		std::vector <Schedule> children;
 
-		//elitism();
+		elitism();
 		crossover(children);
 		mutation_shift(children);
 
@@ -376,18 +376,22 @@ public:
 	{
 		this->sortParents();
 
-		int elitism_parameter;
 		this->elitism_num = 0;
-		elitism_parameter = rand() % 100;
-		if(elitism_parameter < 20) //20% 保留第一個
+		size_t idx_to_push = 0;
+
+		//至少保留一個精英
+		schedules.push_back(schedules[idx_to_push]);
+		this->elitism_num += 1;
+		idx_to_push += 1;
+		
+		for (int rtimes = 1; rtimes < 4; ++rtimes)
 		{
-			schedules.push_back(schedules[0]);
-			this->elitism_num += 1;
-		}
-		if(elitism_parameter < 10) //10% 保留第二個
-		{
-			schedules.push_back(schedules[1]);
-			this->elitism_num += 1;
+			if(rand() % 100 < 100 - rtimes * 20)
+			{
+				schedules.push_back(schedules[idx_to_push]);
+				this->elitism_num += 1;
+				idx_to_push += 1;
+			}
 		}
 	}
 	const Schedule &twoTournament(const Schedule &P1,const Schedule &P2) const
@@ -522,24 +526,21 @@ public:
 		// 已知前半是parent 後半是children
 		this->sortChildren();
 		this->sortParents();
-		this->env2_4();
+		this->env();
 	}
-	void env2_4()
+	void env()
 	{
 		//The method is sort both parent and children
 		//Then pick who has best makespan as new population
 		std::vector <Schedule> new_generation;
+		int children_idx = POPULATION_SIZE;
 		for(int i = 0; i < elitism_num; ++i)
 		{
 			new_generation.push_back(schedules[i]);
 		}
-		for(int i = elitism_num; i < elitism_num + POPULATION_SIZE / 5; ++i)    //parent的前20%
+		for(int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
 		{
-			new_generation.push_back(schedules[i]);
-		}
-		for(int i = POPULATION_SIZE + elitism_num; i < POPULATION_SIZE + elitism_num + 4 * POPULATION_SIZE / 5; ++i)    //children的前80%
-		{
-			new_generation.push_back(schedules[i]);
+			new_generation.push_back(schedules[children_idx + i]);
 		}
 		schedules.clear();
 		schedules = new_generation;
