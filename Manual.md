@@ -27,7 +27,7 @@
 ```
 - 輸入以下指令
 ```
-	                           *
+	                                     *
     $ node Analytics/result.js Analytics/1.res.txt -stat -csv
 ```
 - 接著就可以開啟csv檔作資料分析了
