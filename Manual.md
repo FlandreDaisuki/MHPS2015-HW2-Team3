@@ -22,12 +22,12 @@
 ```
 - 假設想跑第一筆測資就這樣下，標記的地方可改1~9
 ```
-	                *                 *
-	a.exe Benchmark/1.txt > Analytics/1.res.txt
+	                  *                 *
+	$ a.exe Benchmark/1.txt > Analytics/1.res.txt
 ```
 - 輸入以下指令
 ```
-	                                     *
-    $ node Analytics/result.js Analytics/1.res.txt -stat -csv
+	                                      *
+    $ node Analytics/analyze.js Analytics/1.res.txt -stat -csv
 ```
 - 接著就可以開啟csv檔作資料分析了

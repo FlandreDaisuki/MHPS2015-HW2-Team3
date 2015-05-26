@@ -520,7 +520,7 @@ public:
 	{
 		std::vector <int> temp_makespan;
 
-		for (auto itr = schedules.rbegin(); itr != schedules.rbegin() + LOCAL_SEARCH_CHILDREN; ++itr)
+		for (auto itr = schedules.begin() + elitism_num; itr != schedules.begin() + elitism_num + LOCAL_SEARCH_CHILDREN; ++itr)
 		{
 			temp_makespan.push_back(itr->getMakespan());
 			itr->localSearch();
@@ -530,7 +530,7 @@ public:
 
 		int i = 0;
 
-		for (auto itr = schedules.rbegin(); itr != schedules.rbegin() + LOCAL_SEARCH_CHILDREN; ++itr)
+		for (auto itr = schedules.begin() + elitism_num; itr != schedules.begin() + elitism_num + LOCAL_SEARCH_CHILDREN; ++itr)
 		{
 			itr->setMakespan(temp_makespan[i]);
 			++i;
