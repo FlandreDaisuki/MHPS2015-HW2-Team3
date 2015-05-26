@@ -24,14 +24,15 @@
 typedef std::vector< std::vector<int> > Matrix;
 
 const int POPULATION_SIZE = 50; //MA演算法中親代個數
-const int POPULATION_ITERATION = 1500; //GA演算法的代數
+const int POPULATION_ITERATION = 1500; //MA演算法的代數
 
-const int LOCAL_SEARCH_ITERATION = 10000; // iterations of local search
+const int LOCAL_SEARCH_ITERATION = 10000; // local search的代數
 const int LOCAL_SEARCH_FREQUENCY = 50; //每這麼多次做一次Local Search
 const int LOCAL_SEARCH_CHILDREN = 5; // how many children to do Local Search after envSelection()
 
-const double MUTATION_RATE = 0.5;
-const double TOURNAMENT_WORSE_ACCEPT_RATE = 0.3;
+const double MUTATION_RATE = 0.5; //子代的突變率
+const int MUTATION_FREQUENCY = 3; //世代突變頻率
+const double TOURNAMENT_WORSE_ACCEPT_RATE = 0.3; //競爭接受壞的比例
 
 ///一個無編碼的排程，一個解序列
 class Schedule
@@ -373,7 +374,7 @@ public:
 		elitism();
 		crossover(children);
 
-		if (generations != POPULATION_ITERATION - 1)
+		if (generations % MUTATION_FREQUENCY == 0 && generations != POPULATION_ITERATION - 1)
 		{
 			//don't do mutation at last time
 			mutation_shift(children);
@@ -466,34 +467,6 @@ public:
 			for (int Set = 0; Set < 2; ++Set)
 			{
 				children.push_back(jobToSchedule(create_children[Set]));
-			}
-		}
-	}
-	void mutation(std::vector <Schedule> &children)
-	{
-		int job = children[0].getJobs();
-
-		for (auto itr = children.begin() + elitism_num; itr != children.end(); ++itr)
-		{
-			if ((rand() % 10) / 10.0 <= MUTATION_RATE)
-			{
-				int a = rand() % job;
-				int b = rand() % job;
-
-				while (b == a)
-				{
-					b = rand() % job;
-				}
-
-				int c = rand() % job;
-
-				while (c == a || c == b)
-				{
-					c = rand() % job;
-				}
-
-				itr->swapJobs(a, b);
-				itr->swapJobs(b, c);
 			}
 		}
 	}
