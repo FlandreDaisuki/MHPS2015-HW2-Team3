@@ -22,12 +22,16 @@
 /*****************************/
 
 typedef std::vector< std::vector<int> > Matrix;
-const int LOCAL_SEARCH_ITERATION = 10000; // iterations of local search
+
 const int POPULATION_SIZE = 50; //MA演算法中親代個數
-const int POPULATION_CHILDREN_SIZE = 20; //MA演算法中子代個數
 const int POPULATION_ITERATION = 1500; //GA演算法的代數
+
+const int LOCAL_SEARCH_ITERATION = 10000; // iterations of local search
 const int LOCAL_SEARCH_FREQUENCY = 50; //每這麼多次做一次Local Search
 const int LOCAL_SEARCH_CHILDREN = 5; // how many children to do Local Search after envSelection()
+
+const double MUTATION_RATE = 0.5;
+const double TOURNAMENT_WORSE_ACCEPT_RATE = 0.3;
 
 ///一個無編碼的排程，一個解序列
 class Schedule
@@ -230,6 +234,7 @@ private:
 				//accept
 				ii.setMakespan(xafter);
 				reset_th = 0;
+
 				if (xafter < best_t.getMakespan())
 				{
 					best_t = ii;
@@ -334,9 +339,9 @@ public:
 			return a.getMakespan() < b.getMakespan();
 		});
 
-		for (int i = 2; i < POPULATION_SIZE * 2; i += 2)
+		for (int i = 1; i < POPULATION_SIZE ; i += 1)
 		{
-			schedules.push_back(parent_set[i]);
+			schedules.push_back(parent_set[i * 2]);
 		}
 	}
 	void calculateFitness()
@@ -351,10 +356,12 @@ public:
 		for (auto pitr = schedules.begin(); pitr != schedules.end(); ++pitr)
 		{
 			double new_fitness = worst_case - (double)pitr->getMakespan();
-			if(new_fitness <= 0.0)
+
+			if (new_fitness <= 0.0)
 			{
 				new_fitness = (rand() % 100) / 100;
 			}
+
 			pitr->setFitness(new_fitness); //makespan越小 fitness 越大
 		}
 	}
@@ -383,10 +390,10 @@ public:
 		schedules.push_back(schedules[idx_to_push]);
 		this->elitism_num += 1;
 		idx_to_push += 1;
-		
+
 		for (int rtimes = 1; rtimes < 4; ++rtimes)
 		{
-			if(rand() % 100 < 100 - rtimes * 20)
+			if (rand() % 100 <= 100 - rtimes * 20)
 			{
 				schedules.push_back(schedules[idx_to_push]);
 				this->elitism_num += 1;
@@ -394,13 +401,13 @@ public:
 			}
 		}
 	}
-	const Schedule &twoTournament(const Schedule &P1,const Schedule &P2) const
+	const Schedule &twoTournament(const Schedule &P1, const Schedule &P2) const
 	{
-		if(rand() % 100 > 70) //30%
+		if ((rand() % 100) / 100.0 <= TOURNAMENT_WORSE_ACCEPT_RATE)
 		{
 			return (P1.getFitness() < P2.getFitness()) ? P1 : P2;
 		}
-		else //70%
+		else
 		{
 			return (P1.getFitness() > P2.getFitness()) ? P1 : P2;
 		}
@@ -410,10 +417,12 @@ public:
 		int job;
 		job = schedules[0].getJobs();
 		std::vector <int> select_parents[2], create_children[2];
+
 		for (int Set = 0; Set < 2; ++Set)
 		{
 			create_children[Set].resize(job);
 		}
+
 		std::vector <int> rand_select[2];
 
 		for (int i = 0; i < POPULATION_SIZE; i += 2) //一次產生2children
@@ -424,26 +433,31 @@ public:
 				create_children[Set] = select_parents[Set];
 				rand_select[Set] = create_children[Set];
 			}
-			for(int Set = 0; Set < 2; ++Set)
+
+			for (int Set = 0; Set < 2; ++Set)
 			{
-				while(rand_select[Set].size() > job / 4) //建立一個隨機子序列
+				while (rand_select[Set].size() > job / 4) //建立一個隨機子序列
 				{
 					rand_select[Set].erase(rand_select[Set].begin() + (rand() % rand_select[Set].size()));
 				}
 			}
-			for(int Set = 0; Set < 2; ++Set)
+
+			for (int Set = 0; Set < 2; ++Set)
 			{
 				int k = 0; //rand_start 加到第幾個
-				for(int j = 0; j < job; ++j)
+
+				for (int j = 0; j < job; ++j)
 				{
-					if(find(rand_select[(Set + 1) % 2].begin(), rand_select[(Set + 1) % 2].end(), create_children[Set][j]) == rand_select[(Set + 1) % 2].end())
+					if (find(rand_select[(Set + 1) % 2].begin(), rand_select[(Set + 1) % 2].end(), create_children[Set][j]) == rand_select[(Set + 1) % 2].end())
 					{
 						continue;
 					}
+
 					create_children[Set][j] = rand_select[(Set + 1) % 2][k];
 					++k;
 				}
 			}
+
 			for (int Set = 0; Set < 2; ++Set)
 			{
 				children.push_back(jobToSchedule(create_children[Set]));
@@ -456,7 +470,7 @@ public:
 
 		for (auto itr = children.begin(); itr != children.end(); ++itr)
 		{
-			if (rand() % 10 <= 1) // means that 20% probability to mutation
+			if ((rand() % 10) / 10.0 <= MUTATION_RATE)
 			{
 				int a = rand() % job;
 				int b = rand() % job;
@@ -484,41 +498,17 @@ public:
 
 		for (auto itr = children.begin(); itr != children.end(); ++itr)
 		{
-			if (rand() % 10 <= 4) // means that 20% probability to mutation
+			if ((rand() % 10) / 10.0 <= MUTATION_RATE)
 			{
 				int a = rand() % job;
 				int b = rand() % job;
 
-				while(b < job-1 && a > 0) {
+				while (b < job - 1 && a > 0) {
 					itr->swapJobs(b, b + 1);
 					b++;
 					a--;
 				}
 			}
-		}
-	}
-	void select_parent(std::vector <Schedule> &parent, int parent_produce_num)
-	{
-		int group_start_index[POPULATION_SIZE], total_fitness, index;
-		double rand_num;
-		group_start_index[0] = 0;
-		total_fitness = schedules[0].getFitness();
-
-		for (int i = 1; i < POPULATION_SIZE; ++i)
-		{
-			group_start_index[i] = group_start_index[i - 1] + schedules[i - 1].getFitness();
-			total_fitness += schedules[i].getFitness();
-		}
-
-		rand_num = (double)total_fitness * 0.5 / parent_produce_num;
-		index = 0;
-
-		for (int i = 0; i < parent_produce_num; ++i)
-		{
-			for (; index < POPULATION_SIZE && (double)group_start_index[index] <= rand_num; ++index);
-
-			parent.push_back(schedules[index - 1]);
-			rand_num += (double)total_fitness / parent_produce_num;
 		}
 	}
 	void envSelection()
@@ -534,28 +524,32 @@ public:
 		//Then pick who has best makespan as new population
 		std::vector <Schedule> new_generation;
 		int children_idx = POPULATION_SIZE;
-		for(int i = 0; i < elitism_num; ++i)
+
+		for (int i = 0; i < elitism_num; ++i)
 		{
 			new_generation.push_back(schedules[i]);
 		}
-		for(int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
+
+		for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
 		{
 			new_generation.push_back(schedules[children_idx + i]);
 		}
+
 		schedules.clear();
 		schedules = new_generation;
 	}
 	void localSearch()
 	{
 		std::vector <int> temp_makespan;
+
 		for (auto itr = schedules.rbegin(); itr != schedules.rbegin() + LOCAL_SEARCH_CHILDREN; ++itr)
 		{
 			temp_makespan.push_back(itr->getMakespan());
 			itr->localSearch();
 		}
-		
+
 		this->calculateFitness();
-		
+
 		int i = 0;
 
 		for (auto itr = schedules.rbegin(); itr != schedules.rbegin() + LOCAL_SEARCH_CHILDREN; ++itr)
@@ -585,10 +579,6 @@ public:
 			return a.getFitness() > b.getFitness();
 		});
 	}
-	int get_elitism_num()
-	{
-		return elitism_num;
-	}
 	std::vector<int> scheduleToJob(const Schedule &s) const
 	{
 		// Schedule encode to job vector
@@ -611,10 +601,12 @@ public:
 	{
 		// job vector decode to Schedule
 		Matrix m;
+
 		for (size_t i = 0; i < jobv.size(); ++i)
 		{
 			m.push_back(job_map[jobv[i]]);
 		}
+
 		Schedule s(m);
 		return s;
 	}
@@ -632,6 +624,7 @@ public:
 	void printSolutionSimple(std::ostream &out = std::cout) const
 	{
 		int sum_of_makespan = 0;
+
 		for (auto sitr = schedules.begin(); sitr != schedules.end(); ++sitr)
 		{
 			std::vector<int> jobseq = scheduleToJob(*sitr);
