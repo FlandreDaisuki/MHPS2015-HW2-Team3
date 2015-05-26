@@ -16,7 +16,7 @@ int main(int argc, char const *argv[])
 	parent.printSolutionSimple(cout);
 	cout << endl;
 
-	for (int pitr = 0; pitr < POPULATION_ITERATION; ++pitr)
+	for (int pitr = 0; pitr < POPULATION_ITERATION_BASE * parent.getSchedules()[0].getJobs(); ++pitr)
 	{
 		/*
 		When pitr == 0, Makespan and Fitness correct.

@@ -25,6 +25,7 @@ typedef std::vector< std::vector<int> > Matrix;
 
 const int POPULATION_SIZE = 50; //MA演算法中親代個數
 const int POPULATION_ITERATION = 1500; //MA演算法的代數
+const int POPULATION_ITERATION_BASE = 100;
 
 const int LOCAL_SEARCH_ITERATION = 10000; // local search的代數
 const int LOCAL_SEARCH_FREQUENCY = 50; //每這麼多次做一次Local Search
