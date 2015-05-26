@@ -365,14 +365,19 @@ public:
 			pitr->setFitness(new_fitness); //makespan越小 fitness 越大
 		}
 	}
-	void genChildren()
+	void genChildren(int generations)
 	{
 		std::vector <Schedule> parents;
 		std::vector <Schedule> children;
 
 		elitism();
 		crossover(children);
-		mutation_shift(children);
+
+		if (generations != POPULATION_ITERATION - 1)
+		{
+			//don't do mutation at last time
+			mutation_shift(children);
+		}
 
 		for (int i = 0; i < POPULATION_SIZE - elitism_num; ++i)
 		{

@@ -2,7 +2,7 @@ BF = Runall/Benchmark/
 RES = Runall/
 ANA = Runall/Analytics/
 
-all: main mvtorunall runall ana clean
+all: runall ana clean
 
 main:
 	g++ -std=c++11 -O3 main.cpp -o main.out

@@ -12,17 +12,18 @@ int main(int argc, char const *argv[])
 	parent.InitialPopulation();
 
 	parent.calculateFitness();
-	
-    parent.printSolutionSimple(cout);
-    cout<<endl;
+
+	parent.printSolutionSimple(cout);
+	cout << endl;
+
 	for (int pitr = 0; pitr < POPULATION_ITERATION; ++pitr)
 	{
 		/*
 		When pitr == 0, Makespan and Fitness correct.
 		Here Fitness should be EXACTLY correct.
 		*/
-		parent.genChildren();
-			/*
+		parent.genChildren(pitr);
+		/*
 		After genChildren, Children Makespan is not correct and Fitness not.
 		*/
 		parent.calculateMakespan();
@@ -41,6 +42,7 @@ int main(int argc, char const *argv[])
 		Here Fitness should be EXACTLY correct.
 		*/
 		parent.sortPopulation();
+
 		/*
 		After sortPopulation, we can get sorted-by-fitness makespan-correct population, fitness correct as well.
 		*/
@@ -54,10 +56,11 @@ int main(int argc, char const *argv[])
 		}
 
 		parent.printSolutionSimple(cout);
-        cout << endl;
+		cout << endl;
 		/*
 		No matter what we do, Fitness SHOULD BE CORRECT HERE!!!!
 		*/
 	}
+
 	return 0;
 }
