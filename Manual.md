@@ -22,6 +22,6 @@
 ```
 - 輸入以下指令
 ```
-    $ node result.js -all
+    $ node result.js (日期時間).txt -stat -csv
 ```
 - 接著就可以開啟csv檔作資料分析了
