@@ -468,7 +468,7 @@ public:
 	{
 		int job = children[0].getJobs();
 
-		for (auto itr = children.begin(); itr != children.end(); ++itr)
+		for (auto itr = children.begin() + elitism_num; itr != children.end(); ++itr)
 		{
 			if ((rand() % 10) / 10.0 <= MUTATION_RATE)
 			{
@@ -496,7 +496,7 @@ public:
 	{
 		int job = children[0].getJobs();
 
-		for (auto itr = children.begin(); itr != children.end(); ++itr)
+		for (auto itr = children.begin() + elitism_num; itr != children.end(); ++itr)
 		{
 			if ((rand() % 10) / 10.0 <= MUTATION_RATE)
 			{
