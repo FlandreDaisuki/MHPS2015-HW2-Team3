@@ -26,9 +26,9 @@ typedef std::vector< std::vector<int> > Matrix;
 const int POPULATION_SIZE = 50; //MA演算法中親代個數
 const int POPULATION_ITERATION = 1500; //MA演算法的代數
 
-const int LOCAL_SEARCH_ITERATION = 10000; // local search的代數
+const int LOCAL_SEARCH_ITERATION = 100000; // local search的代數
 const int LOCAL_SEARCH_FREQUENCY = 50; //每這麼多次做一次Local Search
-const int LOCAL_SEARCH_CHILDREN = 5; // how many children to do Local Search after envSelection()
+const int LOCAL_SEARCH_CHILDREN = 10; // how many children to do Local Search after envSelection()
 
 const double MUTATION_RATE = 0.5; //子代的突變率
 const int MUTATION_FREQUENCY = 3; //世代突變頻率
@@ -123,7 +123,7 @@ public:
 	}
 	void localSearch()
 	{
-		makespan = (this->ii());
+		makespan = (this->sa());
 	}
 	void shuffle()
 	{
